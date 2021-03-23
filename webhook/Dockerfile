@@ -11,15 +11,16 @@ WORKDIR     /go/src/github.com/adnanh/webhook
 RUN         curl -L --silent -o webhook.tar.gz https://github.com/adnanh/webhook/archive/${WEBHOOK_VERSION}.tar.gz && \
             tar -xzf webhook.tar.gz --strip 1 &&  \
             go get -d && \
-            go build -o /usr/local/bin/webhook && \
-            apk del --purge build-deps && \
-            rm -rf /var/cache/apk/* && \
-            rm -rf /go
+            go build -o /usr/local/bin/webhook
 
 FROM        alpine:3.12 as prod
 COPY        --from=build /usr/local/bin/webhook /usr/local/bin/webhook
-WORKDIR     /etc/webhook
-COPY        webhook/hooks.json .
+RUN         apk add hugo
+COPY        webhook/hooks.json /etc/webhook/
+
+# adds site build script
+COPY        webhook/build-site.sh /usr/local/shared/
+RUN         chmod 511 /usr/local/shared/build-site.sh
 
 EXPOSE      9000
-ENTRYPOINT  ["/usr/local/bin/webhook"]
+ENTRYPOINT  ["/usr/local/bin/webhook", "-debug", "-hooks", "/etc/webhook/hooks.json"]

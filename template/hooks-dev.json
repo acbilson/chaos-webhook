@@ -1,0 +1,10 @@
+[
+	{
+		"id": "content-pull-webhook",
+		"execute-command": "/usr/local/shared/build-site.sh"
+	},
+	{
+		"id": "theme-pull-webhook",
+		"execute-command": "/usr/local/shared/build-site.sh"
+	}
+]
