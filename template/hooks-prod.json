@@ -1,0 +1,30 @@
+[
+	{
+		"id": "content-pull-webhook",
+		"execute-command": "/usr/local/shared/build-site.sh",
+		"trigger-rule": {
+			"match": {
+				"type": "payload-hash-sha1",
+				"secret": "${WEBHOOK_SECRET}",
+				"parameter": {
+					"source": "header",
+					"name": "X-Hub-Signature"
+				}
+			}
+		}
+	},
+	{
+		"id": "theme-pull-webhook",
+		"execute-command": "/usr/local/shared/build-site.sh",
+		"trigger-rule": {
+			"match": {
+				"type": "payload-hash-sha1",
+				"secret": "${WEBHOOK_SECRET}",
+				"parameter": {
+					"source": "header",
+					"name": "X-Hub-Signature"
+				}
+			}
+		}
+	}
+]
