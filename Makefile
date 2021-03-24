@@ -15,7 +15,7 @@ build-dev: config-dev ## builds the webhook docker image in dev configuration
 	docker build -f webhook/Dockerfile -t acbilson/webhook:alpine-3.12 .
 
 .PHONY: build-prod
-build-prod: config ## builds the webhook docker image in prod configuration
+build-prod: config-prod ## builds the webhook docker image in prod configuration
 	sudo podman build -f webhook/Dockerfile -t acbilson/webhook:alpine-3.12 .
 
 .PHONY: start-dev
@@ -34,6 +34,10 @@ start-prod: ## run the webhook docker image in production
 test: ## tests the webhook dev docker image
 	curl http://localhost:9000/hooks/content-pull-webhook; \
 	docker logs -f webhook
+
+.PHONY: clean
+clean: ## cleans remnants of the build process
+	rm webhook/build-site.sh && rm webhook/hooks.json
 
 .PHONY: help
 help: ## show this help
