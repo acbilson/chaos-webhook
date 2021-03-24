@@ -23,4 +23,4 @@ COPY        webhook/build-site.sh /usr/local/shared/
 RUN         chmod 511 /usr/local/shared/build-site.sh
 
 EXPOSE      9000
-ENTRYPOINT  ["/usr/local/bin/webhook", "-debug", "-hooks", "/etc/webhook/hooks.json"]
+ENTRYPOINT  ["/usr/local/bin/webhook", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
