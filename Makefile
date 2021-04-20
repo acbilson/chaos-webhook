@@ -8,6 +8,7 @@ config-dev: ## configures dev templates from env file
 .PHONY: config-prod
 config-prod: ## configures prod templates from env file
 	. ./.env && envsubst < template/hooks-prod.json > webhook/hooks.json; \
+	. ./.env && envsubst < template/container-webhook.service > webhook/container-webhook.service; \
 	cp template/build-site.sh webhook/build-site.sh
 
 .PHONY: build-dev
