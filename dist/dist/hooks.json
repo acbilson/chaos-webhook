@@ -5,7 +5,7 @@
 		"trigger-rule": {
 			"match": {
 				"type": "payload-hash-sha1",
-				"secret": "${PRD_WEBHOOK_SECRET}",
+				"secret": "",
 				"parameter": {
 					"source": "header",
 					"name": "X-Hub-Signature"
@@ -19,7 +19,7 @@
 		"trigger-rule": {
 			"match": {
 				"type": "payload-hash-sha1",
-				"secret": "${PRD_WEBHOOK_SECRET}",
+				"secret": "",
 				"parameter": {
 					"source": "header",
 					"name": "X-Hub-Signature"

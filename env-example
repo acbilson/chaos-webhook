@@ -1,2 +1,1 @@
-#!/bin/sh
-export WEBHOOK_SECRET=mysecrethere
+WEBHOOK_SECRET=mysecrethere

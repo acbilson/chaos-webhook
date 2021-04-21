@@ -1,44 +1,8 @@
 .POSIX:
 
-.PHONY: config-dev
-config-dev: ## configures dev templates from env file
-	. ./.env && envsubst < template/hooks-dev.json > webhook/hooks.json; \
- 	cp template/build-site.sh webhook/build-site.sh
-
-.PHONY: config-prod
-config-prod: ## configures prod templates from env file
-	. ./.env && envsubst < template/hooks-prod.json > webhook/hooks.json; \
-	. ./.env && envsubst < template/container-webhook.service > webhook/container-webhook.service; \
-	cp template/build-site.sh webhook/build-site.sh
-
-.PHONY: build-dev
-build-dev: config-dev ## builds the webhook docker image in dev configuration
-	docker build -f webhook/Dockerfile -t acbilson/webhook:alpine-3.12 .
-
-.PHONY: build-prod
-build-prod: config-prod ## builds the webhook docker image in prod configuration
-	sudo podman build -f webhook/Dockerfile -t acbilson/webhook:alpine-3.12 .
-
-.PHONY: start-dev
-start-dev: build-dev ## run the webhook docker image in development
-	docker run --rm -d -p 9000:9000 --name webhook \
-		-v ~/source/alexbilson.dev/hugo/config:/etc/hugo \
-		-v ~/source/chaos-content:/mnt/chaos/content \
-		-v ~/source/chaos-theme:/mnt/chaos/themes/chaos \
-		acbilson/webhook:alpine-3.12 .
-
-.PHONY: start-prod
-start-prod: ## run the webhook docker image in production
-	echo 'production webhook will be deployed across multiple containers'
-
-.PHONY: test
-test: ## tests the webhook dev docker image
-	curl http://localhost:9000/hooks/content-pull-webhook; \
-	docker logs -f webhook
-
-.PHONY: clean
-clean: ## cleans remnants of the build process
-	rm webhook/build-site.sh && rm webhook/hooks.json
+##################
+# Additional Tasks
+##################
 
 .PHONY: help
 help: ## show this help
@@ -46,3 +10,46 @@ help: ## show this help
 	sort | \
 	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: clean
+clean: ## cleans remnants of the build process
+	. ./scripts/clean.sh dev
+
+##############
+# UAT Workflow
+##############
+
+.PHONY: clean-uat
+clean-uat: clean ## cleans remnants of the build process on the UAT machine
+	. ./scripts/clean.sh uat
+
+.PHONY: build-uat
+build-uat: clean-uat ## builds a remote UAT Docker image
+	. ./scripts/build.sh uat
+
+.PHONY: deploy-uat
+deploy-uat: ## deploys a remote UAT environment
+	. ./scripts/deploy.sh uat
+
+.PHONY: stop-uat
+stop-uat: ## stops a remote UAT environment
+	. ./scripts/stop.sh uat
+
+.PHONY: smoketest
+smoketest: ## runs smoke tests against the remote UAT environment
+	. ./scripts/test.sh smoke
+
+#####################
+# Deployment Workflow
+#####################
+
+.PHONY: clean-prod
+clean-prod: clean ## cleans remnants of the build process on the production machine
+	. ./scripts/clean.sh prod
+
+.PHONY: build-prod
+build-prod: clean-prod ## builds a remote production Docker image
+	. ./scripts/build.sh prod
+
+.PHONY: deploy
+deploy: ## deploys the remote production Docker image
+	. ./scripts/deploy.sh prod

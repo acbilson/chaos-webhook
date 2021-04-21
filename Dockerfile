@@ -13,14 +13,19 @@ RUN         curl -L --silent -o webhook.tar.gz https://github.com/adnanh/webhook
             go get -d && \
             go build -o /usr/local/bin/webhook
 
-FROM        alpine:3.12 as prod
+FROM        alpine:3.12 as base
 COPY        --from=build /usr/local/bin/webhook /usr/local/bin/webhook
 RUN         apk add hugo
-COPY        webhook/hooks.json /etc/webhook/
 
 # adds site build script
-COPY        webhook/build-site.sh /usr/local/shared/
-RUN         chmod 511 /usr/local/shared/build-site.sh
+COPY        dist/build-site.sh /usr/local/shared/
+RUN         chmod +x /usr/local/shared/build-site.sh
 
-EXPOSE      9000
+# adds hooks
+COPY        dist/hooks.json /etc/webhook/
+
+FROM        base as uat
+ENTRYPOINT  ["/usr/local/bin/webhook", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
+
+FROM        base as prod
 ENTRYPOINT  ["/usr/local/bin/webhook", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
