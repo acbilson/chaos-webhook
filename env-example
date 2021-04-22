@@ -1,1 +1,34 @@
-WEBHOOK_SECRET=mysecrethere
+########
+# Global
+########
+
+# remote hosts
+# I use an ssh config file to specify the user/ip combination
+# for ssh interaction. These are hosts specified in ~/.ssh/config
+PROD_HOST=web
+UAT_HOST=web
+
+######################
+# Environment-Specific
+######################
+
+# The port exposed by the service.
+UAT_EXPOSED_PORT=9301
+EXPOSED_PORT=9300
+
+# The public-facing url. May be routed behind a proxy.
+UAT_SITE=https://uat.mysite.com
+PRD_SITE=https://mysite.com
+
+# webhook secrets
+UAT_WEBHOOK_SECRET=myuatwebhooksecret
+PRD_WEBHOOK_SECRET=myuatwebhooksecret
+
+# paths
+UAT_CONTENT_PATH=/my/uat/hugo/content/path
+UAT_THEME_PATH=/my/uat/hugo/theme/path
+UAT_SITE_PATH=/my/uat/site/path
+
+PRD_CONTENT_PATH=/my/hugo/content/path
+PRD_THEME_PATH=/my/hugo/theme/path
+PRD_SITE_PATH=/my/site/path
