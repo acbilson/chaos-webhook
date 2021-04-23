@@ -15,7 +15,10 @@ RUN         curl -L --silent -o webhook.tar.gz https://github.com/adnanh/webhook
 
 FROM        alpine:3.12 as base
 COPY        --from=build /usr/local/bin/webhook /usr/local/bin/webhook
-RUN         apk add hugo
+RUN         apk add hugo git
+
+# adds hugo config
+COPY        dist/config.toml /etc/hugo/
 
 # adds site build script
 COPY        dist/build-site.sh /usr/local/shared/
@@ -25,7 +28,7 @@ RUN         chmod +x /usr/local/shared/build-site.sh
 COPY        dist/hooks.json /etc/webhook/
 
 FROM        base as uat
-ENTRYPOINT  ["/usr/local/bin/webhook", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
+ENTRYPOINT  ["/usr/local/bin/webhook", "-debug", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
 
 FROM        base as prod
 ENTRYPOINT  ["/usr/local/bin/webhook", "-verbose", "-hooks", "/etc/webhook/hooks.json"]

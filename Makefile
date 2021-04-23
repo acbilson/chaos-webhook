@@ -18,6 +18,10 @@ clean: ## cleans remnants of the build process
 # UAT Workflow
 ##############
 
+.PHONY: temp
+temp: ## cleans remnants of the build process on the UAT machine
+	. ./scripts/build.sh temp
+
 .PHONY: clean-uat
 clean-uat: clean ## cleans remnants of the build process on the UAT machine
 	. ./scripts/clean.sh uat

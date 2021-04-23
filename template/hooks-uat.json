@@ -2,29 +2,71 @@
 	{
 		"id": "content-pull-webhook",
 		"execute-command": "/usr/local/shared/build-site.sh",
+		"command-working-directory": "/mnt/chaos/content",
+    "pass-arguments-to-command": [
+    {
+      "source": "payload",
+      "name": "ref"
+    }
+    ],
 		"trigger-rule": {
-			"match": {
-				"type": "payload-hash-sha1",
-				"secret": "${UAT_WEBHOOK_SECRET}",
-				"parameter": {
-					"source": "header",
-					"name": "X-Hub-Signature"
-				}
-			}
-		}
+      "and": [
+        {
+          "match": {
+            "type": "value",
+            "value": "refs/heads/uat",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            }
+          }
+        },
+        {
+          "match": {
+            "type": "payload-hmac-sha1",
+            "secret": "${UAT_WEBHOOK_SECRET}",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature"
+            }
+          }
+        }
+      ]
+    }
 	},
 	{
 		"id": "theme-pull-webhook",
 		"execute-command": "/usr/local/shared/build-site.sh",
+		"command-working-directory": "/mnt/chaos/themes/chaos",
+    "pass-arguments-to-command": [
+    {
+      "source": "payload",
+      "name": "ref"
+    }
+    ],
 		"trigger-rule": {
-			"match": {
-				"type": "payload-hash-sha1",
-				"secret": "${UAT_WEBHOOK_SECRET}",
-				"parameter": {
-					"source": "header",
-					"name": "X-Hub-Signature"
-				}
-			}
-		}
+      "and": [
+        {
+          "match": {
+            "type": "value",
+            "value": "refs/heads/uat",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            }
+          }
+        },
+        {
+          "match": {
+            "type": "payload-hmac-sha1",
+            "secret": "${UAT_WEBHOOK_SECRET}",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature"
+            }
+          }
+        }
+      ]
+    }
 	}
 ]

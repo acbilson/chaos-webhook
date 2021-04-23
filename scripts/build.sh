@@ -7,9 +7,11 @@ case $ENVIRONMENT in
 
 uat)
   echo "creates files from template..."
+  echo "${UAT_BRANCH}"
   mkdir -p dist/dist && \
     envsubst < template/hooks-uat.json > dist/dist/hooks.json && \
-    envsubst < template/build-site.sh > dist/dist/build-site.sh
+    envsubst < template/config-uat.toml > dist/dist/config.toml && \
+    cp template/build-site.sh dist/dist/build-site.sh
 
   echo "copies files to distribute..."
   cp Dockerfile dist/
@@ -30,7 +32,8 @@ prod)
   echo "creates files from template..."
   mkdir -p dist/dist && \
     envsubst < template/hooks-prod.json > dist/dist/hooks.json && \
-    envsubst < template/build-site.sh > dist/dist/build-site.sh && \
+    envsubst < template/config-prod.toml > dist/dist/config.toml && \
+    cp template/build-site.sh dist/dist/build-site.sh && \
     envsubst < template/container-webhook.service > dist/container-webhook.service
 
   echo "copies files to distribute..."

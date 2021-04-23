@@ -1,6 +1,7 @@
 ########
 # Global
 ########
+set -a # exports vars - docker needs no export, but bash scripts do
 
 # remote hosts
 # I use an ssh config file to specify the user/ip combination
