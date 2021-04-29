@@ -3,28 +3,13 @@
 REF=$1
 REPO=$2
 
-BRANCH=unset
+CONTENT_BRANCH=unset
+THEME_BRANCH=unset
 PATH=unset
 DIST_PATH=unset
 
-case $REF in
-
-  refs/heads/master)
-    BRANCH=master
-    DIST_PATH=/var/www/site
-  ;;
-
-  refs/heads/uat)
-    BRANCH=uat
-    DIST_PATH=/var/www/uat
-  ;;
-
-  *)
-    echo "$REF was not a valid git reference"
-    echo "################"
-    return 1
-esac
-
+# Verifies that the repo is one of those authorized
+####
 case $REPO in
 
   chaos-content)
@@ -42,19 +27,130 @@ case $REPO in
   ;;
 esac
 
-echo "checking out $BRANCH for content and themes"
+# Verifies that the branch ref is supported for webhook
+####
+case $REF in
+
+  refs/heads/master)
+    BRANCH=master
+    DIST_PATH=/var/www/site
+  ;;
+
+  refs/heads/release/*)
+    BRANCH="release/$(/usr/bin/basename $REF)"
+    DIST_PATH=/var/www/uat
+  ;;
+
+  *)
+    echo "$REF was not a valid git reference"
+    echo "################"
+    return 1
+esac
+
+echo "checking out $BRANCH for content"
 echo "################"
 cd /mnt/chaos/content
-/usr/bin/git checkout $BRANCH
-cd /mnt/chaos/themes/chaos
-/usr/bin/git checkout $BRANCH
+/usr/bin/git fetch
 
-echo "pulling $BRANCH branch at $PATH"
-echo "################"
-cd $PATH
-/usr/bin/git pull
+# Retrieves content based on which repo is requested
+#
+# This approach allows me to have a release candidate for one
+# repo and use master for the other, or the same release candidate
+# for both.
+####
+case $REPO in
 
-echo "building site from $BRANCH to $DIST_PATH"
+chaos-content)
+
+  echo "\nfetching content"
+  echo "################"
+  cd /mnt/chaos/content && /usr/bin/git fetch
+
+  echo "\nchecking out content on $BRANCH"
+  echo "################"
+  /usr/bin/git checkout $BRANCH
+
+  echo "\npulling latest from $BRANCH"
+  echo "################"
+  /usr/bin/git pull
+
+  echo "\nfetching theme"
+  echo "################"
+  cd /mnt/chaos/themes/chaos && /usr/bin/git fetch
+
+  # if a release candidate does not exist for theme like it does for content, use master
+  BRANCH_EXISTS=$(/usr/bin/git ls-remote --heads origin $REF | /usr/bin/wc -l)
+
+  if [ $BRANCH_EXISTS == 0 ]; then
+
+    echo "\nchecking out theme master because $BRANCH does not exist"
+    echo "################"
+    /usr/bin/git checkout master
+
+    echo "\npulling latest from theme master"
+    echo "################"
+    /usr/bin/git pull
+
+  else
+
+    echo "\nchecking out theme on $BRANCH"
+    echo "################"
+    /usr/bin/git checkout $BRANCH
+
+    echo "\npulling latest from $BRANCH"
+    echo "################"
+    /usr/bin/git pull
+
+  fi
+;;
+
+chaos-theme)
+
+  echo "\nfetching theme"
+  echo "################"
+  cd /mnt/chaos/themes/chaos && /usr/bin/git fetch
+
+  echo "\nchecking out theme on $BRANCH"
+  echo "################"
+  /usr/bin/git checkout $BRANCH
+
+  echo "\npulling latest from $BRANCH"
+  echo "################"
+  /usr/bin/git pull
+
+  echo "\nfetching content"
+  echo "################"
+  cd /mnt/chaos/content && /usr/bin/git fetch
+
+  # if a release candidate does not exist for theme like it does for content, use master
+  BRANCH_EXISTS=$(/usr/bin/git ls-remote --heads origin $REF | /usr/bin/wc -l)
+
+  if [ $BRANCH_EXISTS == 0 ]; then
+
+    echo "\nchecking out content master because $BRANCH does not exist"
+    echo "################"
+    /usr/bin/git checkout master
+
+    echo "\npulling latest from content master"
+    echo "################"
+    /usr/bin/git pull
+
+  else
+
+    echo "\nchecking out content on $BRANCH"
+    echo "################"
+    /usr/bin/git checkout $BRANCH
+
+    echo "\npulling latest from $BRANCH"
+    echo "################"
+    /usr/bin/git pull
+
+  fi
+  ;;
+
+esac
+
+echo "\nbuilding site from $BRANCH to $DIST_PATH"
 echo "################"
 /usr/bin/hugo \
   -d $DIST_PATH \
