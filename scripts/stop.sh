@@ -13,8 +13,8 @@ uat)
 
 prod)
   echo "stops container in production..."
-  ssh -t ${PROD_HOST} \
-    sudo podman stop webhook
+  ssh -t ${PROD_HOST} sudo systemctl disable webhook
+  ssh -t ${PROD_HOST} sudo podman stop webhook
 ;;
 
 *)

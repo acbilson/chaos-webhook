@@ -26,10 +26,6 @@ UAT_WEBHOOK_SECRET=myuatwebhooksecret
 PRD_WEBHOOK_SECRET=myuatwebhooksecret
 
 # paths
-UAT_CONTENT_PATH=/my/uat/hugo/content/path
-UAT_THEME_PATH=/my/uat/hugo/theme/path
-UAT_SITE_PATH=/my/uat/site/path
-
-PRD_CONTENT_PATH=/my/hugo/content/path
-PRD_THEME_PATH=/my/hugo/theme/path
-PRD_SITE_PATH=/my/site/path
+CONTENT_PATH=/my/uat/hugo/content/path
+THEME_PATH=/my/uat/hugo/theme/path
+SITE_PATH=/my/uat/site/path

@@ -21,8 +21,8 @@ RUN         apk add hugo git
 COPY        dist/config.toml /etc/hugo/
 
 # adds site build script
-COPY        dist/build-site.sh /usr/local/shared/
-RUN         chmod +x /usr/local/shared/build-site.sh
+COPY        dist/build-site.sh /usr/local/bin/
+RUN         chmod +x /usr/local/bin/build-site.sh
 
 # adds hooks
 COPY        dist/hooks.json /etc/webhook/

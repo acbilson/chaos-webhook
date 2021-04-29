@@ -1,72 +1,50 @@
 [
 	{
 		"id": "content-pull-webhook",
-		"execute-command": "/usr/local/shared/build-site.sh",
-		"command-working-directory": "/mnt/chaos/content",
+		"execute-command": "/usr/local/bin/build-site.sh",
     "pass-arguments-to-command": [
     {
       "source": "payload",
       "name": "ref"
+    },
+    {
+      "source": "payload",
+      "name": "repository.name"
     }
     ],
 		"trigger-rule": {
-      "and": [
-        {
-          "match": {
-            "type": "value",
-            "value": "refs/heads/uat",
-            "parameter": {
-              "source": "payload",
-              "name": "ref"
-            }
-          }
-        },
-        {
-          "match": {
-            "type": "payload-hmac-sha1",
-            "secret": "${UAT_WEBHOOK_SECRET}",
-            "parameter": {
-              "source": "header",
-              "name": "X-Hub-Signature"
-            }
-          }
+      "match": {
+        "type": "payload-hmac-sha1",
+        "secret": "${UAT_WEBHOOK_SECRET}",
+        "parameter": {
+          "source": "header",
+          "name": "X-Hub-Signature"
         }
-      ]
+      }
     }
 	},
 	{
 		"id": "theme-pull-webhook",
-		"execute-command": "/usr/local/shared/build-site.sh",
-		"command-working-directory": "/mnt/chaos/themes/chaos",
+		"execute-command": "/usr/local/bin/build-site.sh",
     "pass-arguments-to-command": [
     {
       "source": "payload",
       "name": "ref"
+    },
+    {
+      "source": "payload",
+      "name": "repository.name"
     }
     ],
 		"trigger-rule": {
-      "and": [
-        {
-          "match": {
-            "type": "value",
-            "value": "refs/heads/uat",
-            "parameter": {
-              "source": "payload",
-              "name": "ref"
-            }
-          }
-        },
-        {
-          "match": {
-            "type": "payload-hmac-sha1",
-            "secret": "${UAT_WEBHOOK_SECRET}",
-            "parameter": {
-              "source": "header",
-              "name": "X-Hub-Signature"
-            }
-          }
+      "match": {
+        "type": "payload-hmac-sha1",
+        "secret": "${UAT_WEBHOOK_SECRET}",
+        "parameter": {
+          "source": "header",
+          "name": "X-Hub-Signature"
         }
-      ]
+      }
     }
 	}
 ]

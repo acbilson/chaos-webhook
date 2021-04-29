@@ -18,10 +18,6 @@ clean: ## cleans remnants of the build process
 # UAT Workflow
 ##############
 
-.PHONY: temp
-temp: ## cleans remnants of the build process on the UAT machine
-	. ./scripts/build.sh temp
-
 .PHONY: clean-uat
 clean-uat: clean ## cleans remnants of the build process on the UAT machine
 	. ./scripts/clean.sh uat
@@ -50,9 +46,13 @@ smoketest: ## runs smoke tests against the remote UAT environment
 clean-prod: clean ## cleans remnants of the build process on the production machine
 	. ./scripts/clean.sh prod
 
-.PHONY: build-prod
-build-prod: clean-prod ## builds a remote production Docker image
+.PHONY: build
+build: clean-prod ## builds a remote production Docker image
 	. ./scripts/build.sh prod
+
+.PHONY: stop
+stop: ## stops the remote production service
+	. ./scripts/stop.sh prod
 
 .PHONY: deploy
 deploy: ## deploys the remote production Docker image
