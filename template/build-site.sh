@@ -7,6 +7,7 @@ CONTENT_BRANCH=unset
 THEME_BRANCH=unset
 PATH=unset
 DIST_PATH=unset
+CONFIG_PATH=unset
 
 # Verifies that the repo is one of those authorized
 ####
@@ -34,11 +35,13 @@ case $REF in
   refs/heads/master)
     BRANCH=master
     DIST_PATH=/var/www/site
+    CONFIG_PATH=/etc/hugo/config-prod.toml
   ;;
 
   refs/heads/release/*)
     BRANCH="release/$(/usr/bin/basename $REF)"
     DIST_PATH=/var/www/uat
+    CONFIG_PATH=/etc/hugo/config-uat.toml
   ;;
 
   *)
@@ -154,7 +157,7 @@ echo "\nbuilding site from $BRANCH to $DIST_PATH"
 echo "################"
 /usr/bin/hugo \
   -d $DIST_PATH \
-  --config /etc/hugo/config.toml \
+  --config $CONFIG_PATH \
   --contentDir /mnt/chaos/content \
   --themesDir /mnt/chaos/themes \
   --cleanDestinationDir

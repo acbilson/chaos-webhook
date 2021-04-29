@@ -17,8 +17,9 @@ FROM        alpine:3.12 as base
 COPY        --from=build /usr/local/bin/webhook /usr/local/bin/webhook
 RUN         apk add hugo git
 
-# adds hugo config
-COPY        dist/config.toml /etc/hugo/
+# adds hugo configs
+COPY        dist/config-prod.toml /etc/hugo/
+COPY        dist/config-uat.toml /etc/hugo/
 
 # adds site build script
 COPY        dist/build-site.sh /usr/local/bin/
