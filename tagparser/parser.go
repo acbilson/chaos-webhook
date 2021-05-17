@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,12 +12,14 @@ import (
 )
 
 type Tag struct {
-	Count int      `json:"count"`
-	Near  []string `json:"near"`
+	Folder string
+	Count  int
+	Near   []string
 }
 
 type Node struct {
 	Name  string `json:"name"`
+	Type  string `json:"type"`
 	Count int    `json:"count"`
 	Path  string `json:"path"`
 }
@@ -33,13 +36,46 @@ type Nodes struct {
 
 func main() {
 
-	root := "../../chaos-content/comments"
+	rootFlag := flag.String("root", "../../chaos-content", "starting point for the command")
+	dirsFlag := flag.String("dirs", "comments,posts", "comma-separated list of folders to pull tags")
+	outFlag := flag.String("output", "diagram.json", "file path to write json")
+	flag.Parse()
 
-	files, err := getFiles(root)
+	var allTagsMap []map[string]Tag
+
+	for _, folder := range strings.Split(*dirsFlag, ",") {
+		path := filepath.Join(*rootFlag, folder)
+		tagMap := readTagsInPath(path, folder)
+		allTagsMap = append(allTagsMap, tagMap)
+	}
+
+	everything := merge(allTagsMap)
+	data := convertToNodes(everything)
+	content, err := json.Marshal(data)
+
+	if err != nil {
+		fmt.Println("Error parsing to json", err)
+	}
+
+	writeToFile(content, *outFlag)
+}
+
+func merge(maps []map[string]Tag) map[string]Tag {
+	merged := make(map[string]Tag)
+	for _, m := range maps {
+		for k, v := range m {
+			merged[k] = v
+		}
+	}
+	return merged
+}
+
+func readTagsInPath(path, folder string) map[string]Tag {
+	files, err := getFiles(path)
 
 	if err != nil {
 		fmt.Println("Directory read error", err)
-		return
+		return nil
 	}
 
 	tagMap := make(map[string]Tag)
@@ -48,12 +84,12 @@ func main() {
 		if !files[x].IsDir() {
 			fileName := files[x].Name()
 
-			path := filepath.Join(root, fileName)
+			path := filepath.Join(path, fileName)
 			lines, err := scanTags(path)
 
 			if err != nil {
 				fmt.Println("File reading error", err)
-				return
+				return nil
 			}
 
 			if lines == nil {
@@ -83,24 +119,22 @@ func main() {
 						allNearTags = nearTags
 					}
 
-					tagMap[tag] = Tag{Count: tagMap[tag].Count + 1, Near: allNearTags}
+					tagMap[tag] = Tag{
+						Folder: tagMap[tag].Folder,
+						Count:  tagMap[tag].Count + 1,
+						Near:   allNearTags}
 
 					// when this is a new tag
 				} else {
-					tagMap[tag] = Tag{Count: 1, Near: nearTags}
+					tagMap[tag] = Tag{
+						Folder: folder,
+						Count:  1,
+						Near:   nearTags}
 				}
 			}
 		}
 	}
-
-	data := convertToNodes(tagMap)
-	content, err := json.Marshal(data)
-
-	if err != nil {
-		fmt.Println("Error parsing to json", err)
-	}
-
-	writeToFile(content)
+	return tagMap
 }
 
 func convertToNodes(tags map[string]Tag) Nodes {
@@ -108,7 +142,11 @@ func convertToNodes(tags map[string]Tag) Nodes {
 	var links []Link
 
 	for key, val := range tags {
-		node := Node{Name: key, Count: val.Count, Path: fmt.Sprintf("/tags/%s/", key)}
+		node := Node{
+			Name:  key,
+			Type:  val.Folder,
+			Count: val.Count,
+			Path:  fmt.Sprintf("/tags/%s/", key)}
 
 		for _, tag := range val.Near {
 			link := Link{Source: key, Target: tag}
@@ -138,8 +176,8 @@ func contains(list []string, value string) bool {
 	return false
 }
 
-func writeToFile(content []byte) {
-	err := ioutil.WriteFile("temp.json", content, 0644)
+func writeToFile(content []byte, output string) {
+	err := ioutil.WriteFile(output, content, 0644)
 	if err != nil {
 		fmt.Println("failed to write to file", err)
 		return

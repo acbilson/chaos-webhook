@@ -1,3 +1,3 @@
-module alexbilson.dev/tagparser/v0.1
+module alexbilson.dev/tagparser
 
 go 1.16

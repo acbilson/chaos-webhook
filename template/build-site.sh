@@ -8,6 +8,7 @@ THEME_BRANCH=unset
 PATH=unset
 DIST_PATH=unset
 CONFIG_PATH=unset
+BUILD_TAGS=0
 
 # Verifies that the repo is one of those authorized
 ####
@@ -15,6 +16,7 @@ case $REPO in
 
   chaos-content)
     PATH=/mnt/chaos/content
+    BUILD_TAGS=1
   ;;
 
   chaos-theme)
@@ -161,3 +163,11 @@ echo "################"
   --contentDir /mnt/chaos/content \
   --themesDir /mnt/chaos/themes \
   --cleanDestinationDir
+
+if [ $BUILD_TAGS == 1 ]; then
+  echo "\nbuilding network tags"
+  echo "################"
+  /usr/local/bin/tagparser \
+    --root /mnt/chaos/content \
+    --output /mnt/chaos/content/network/diagram.json
+fi
