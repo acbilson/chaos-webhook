@@ -6,12 +6,14 @@ ENVIRONMENT=$1
 case $ENVIRONMENT in
 
 uat)
+
   echo "creates files from template..."
   echo "${UAT_BRANCH}"
   mkdir -p dist/dist && \
     envsubst < template/hooks-uat.json > dist/dist/hooks.json && \
     envsubst < template/config-uat.toml > dist/dist/config-uat.toml && \
     envsubst < template/config-prod.toml > dist/dist/config-prod.toml && \
+    cp -r tagparser dist/src && \
     cp template/build-site.sh dist/dist/build-site.sh
 
   echo "copies files to distribute..."
@@ -35,6 +37,7 @@ prod)
     envsubst < template/hooks-prod.json > dist/dist/hooks.json && \
     envsubst < template/config-prod.toml > dist/dist/config-prod.toml && \
     envsubst < template/config-uat.toml > dist/dist/config-uat.toml && \
+    cp -r tagparser dist/src && \
     cp template/build-site.sh dist/dist/build-site.sh && \
     envsubst < template/container-webhook.service > dist/container-webhook.service
 

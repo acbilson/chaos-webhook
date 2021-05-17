@@ -13,8 +13,14 @@ RUN         curl -L --silent -o webhook.tar.gz https://github.com/adnanh/webhook
             go get -d && \
             go build -o /usr/local/bin/webhook
 
+# build the tagparser projectd
+COPY        src /go/src/tagparser
+WORKDIR     /go/src/tagparser
+RUN         go version && go install
+
 FROM        alpine:3.12 as base
 COPY        --from=build /usr/local/bin/webhook /usr/local/bin/webhook
+COPY        --from=build /go/bin/tagparser /usr/local/bin/tagparser
 RUN         apk add hugo git
 
 # adds hugo configs
