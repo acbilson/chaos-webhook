@@ -64,7 +64,17 @@ func merge(maps []map[string]Tag) map[string]Tag {
 	merged := make(map[string]Tag)
 	for _, m := range maps {
 		for k, v := range m {
-			merged[k] = v
+			_, ok := merged[k]
+			// if this tag has been set in another folder
+			if ok {
+				merged[k] = Tag{
+					Folder: "both",
+					Count:  merged[k].Count + v.Count,
+					Near:   appendNewTags(merged[k].Near, v.Near),
+				}
+			} else {
+				merged[k] = v
+			}
 		}
 	}
 	return merged
@@ -97,9 +107,11 @@ func readTagsInPath(path, folder string) map[string]Tag {
 			}
 
 			// prints a summary of the file
-			fmt.Println("")
-			fmt.Println("file:", fileName)
-			fmt.Println("tags:", lines)
+			/*
+				fmt.Println("")
+				fmt.Println("file:", fileName)
+				fmt.Println("tags:", lines)
+			*/
 
 			for i := 0; i < len(lines); i++ {
 				tag := strings.Trim(lines[i], " \"")
