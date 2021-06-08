@@ -4,7 +4,7 @@ title = "Of Chaos and Order"
 author = "Alex Bilson"
 theme = "chaos"
 sectionPagesMenu = "main"
-paginate = 10
+defaultColorMode = "light"
 
 [taxonomies]
   category = "categories"
