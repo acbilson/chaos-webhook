@@ -169,5 +169,5 @@ if [ $BUILD_TAGS == 1 ]; then
   echo "################"
   /usr/local/bin/tagparser \
     --root /mnt/chaos/content \
-    --output /mnt/chaos/content/network/diagram.json
+    --output $DIST_PATH/network/diagram.json
 fi
