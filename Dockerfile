@@ -1,6 +1,6 @@
 # Dockerfile for https://github.com/adnanh/webhook
 # example modified from https://almir/docker-webhook
-FROM        golang:alpine3.12 AS build
+FROM        golang:alpine3.14 AS build
 ENV         WEBHOOK_VERSION 2.8.0
 
 # add build deps
@@ -18,7 +18,7 @@ COPY        src /go/src/tagparser
 WORKDIR     /go/src/tagparser
 RUN         go version && go install
 
-FROM        alpine:3.12 as base
+FROM        alpine:3.14 as base
 COPY        --from=build /usr/local/bin/webhook /usr/local/bin/webhook
 COPY        --from=build /go/bin/tagparser /usr/local/bin/tagparser
 RUN         apk add hugo git

@@ -13,7 +13,7 @@ Environment=PODMAN_SYSTEMD_UNIT=%n
 Restart=on-failure
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/container-webhook.pid %t/container-webhook.ctr-id
-ExecStart=/usr/bin/podman run --conmon-pidfile %t/container-webhook.pid --cidfile %t/container-webhook.ctr-id --cgroups=no-conmon --replace --rm -d -p ${EXPOSED_PORT}:9000 --name webhook -v ${CONTENT_PATH}/chaos-content:/mnt/chaos/content -v ${THEME_PATH}/chaos-theme:/mnt/chaos/themes/chaos -v ${SITE_PATH}/alexbilson.dev:/var/www/site -v ${SITE_PATH}/uat:/var/www/uat acbilson/webhook:alpine-3.12
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/container-webhook.pid --cidfile %t/container-webhook.ctr-id --cgroups=no-conmon --replace --rm -d -p ${EXPOSED_PORT}:9000 --name webhook -v ${CONTENT_PATH}/chaos-content:/mnt/chaos/content -v ${THEME_PATH}/chaos-theme:/mnt/chaos/themes/chaos -v ${SITE_PATH}/alexbilson.dev:/var/www/site -v ${SITE_PATH}/uat:/var/www/uat acbilson/webhook:alpine
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/container-webhook.ctr-id -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/container-webhook.ctr-id
 PIDFile=%t/container-webhook.pid

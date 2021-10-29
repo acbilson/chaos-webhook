@@ -25,7 +25,7 @@ The processor architecture and container tooling I use in production differs fro
 
 ### Artifacts
 
-Docker image: acbilson/webhook-uat:alpine-3.12
+Docker image: acbilson/webhook-uat:alpine
 Hugo config: config-uat.toml
 Hugo build script: build-site.sh
 Hugo theme: [acbilson/chaos-theme](https://github.com/acbilson/chaos-theme.git)
@@ -66,7 +66,7 @@ Right now, this only performs a health check.
 
 ### Artifacts
 
-Docker image: acbilson/webhook:alpine-3.12
+Docker image: acbilson/webhook:alpine
 Hugo config: config.toml
 Hugo build script: build-site.sh
 Systemd service file: container-webhook.service

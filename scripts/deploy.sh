@@ -14,7 +14,7 @@ uat)
       -v ${THEME_PATH}/chaos-theme:/mnt/chaos/themes/chaos \
       -v ${SITE_PATH}/uat:/var/www/uat \
       --name webhook-uat \
-      acbilson/webhook-uat:alpine-3.12
+      acbilson/webhook-uat:alpine
 ;;
 
 prod)

@@ -27,7 +27,7 @@ uat)
     sudo podman build \
       -f /mnt/msata/build/uat/Dockerfile \
       --target=uat \
-      -t acbilson/webhook-uat:alpine-3.12 \
+      -t acbilson/webhook-uat:alpine \
       /mnt/msata/build/uat
 ;;
 
@@ -52,7 +52,7 @@ prod)
     sudo podman build \
       -f /mnt/msata/build/prod/Dockerfile \
       --target=prod \
-      -t acbilson/webhook:alpine-3.12 \
+      -t acbilson/webhook:alpine \
       /mnt/msata/build/prod
 ;;
 
