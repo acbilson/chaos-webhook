@@ -7,7 +7,7 @@ sectionPagesMenu = "main"
 defaultColorMode = "light"
 
 [taxonomies]
-  category = "categories"
+  author = "authors"
   tag = "tags"
 
 [markup]
