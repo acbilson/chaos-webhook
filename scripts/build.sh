@@ -27,9 +27,11 @@ uat)
   echo "${UAT_BRANCH}"
   mkdir -p dist/dist && \
     envsubst < template/hooks.json > dist/dist/hooks.json && \
+    envsubst < template/config-dev.toml > dist/dist/config-dev.toml && \
     envsubst < template/config-uat.toml > dist/dist/config-uat.toml && \
     envsubst < template/config-prod.toml > dist/dist/config-prod.toml && \
     cp -r tagparser dist/src && \
+    cp template/test-site.sh dist/dist/test-site.sh && \
     cp template/build-site.sh dist/dist/build-site.sh
 
   echo "copies files to distribute..."
@@ -51,9 +53,11 @@ prod)
   echo "creates files from template..."
   mkdir -p dist/dist && \
     envsubst < template/hooks.json > dist/dist/hooks.json && \
+    envsubst < template/config-dev.toml > dist/dist/config-dev.toml && \
     envsubst < template/config-prod.toml > dist/dist/config-prod.toml && \
     envsubst < template/config-uat.toml > dist/dist/config-uat.toml && \
     cp -r tagparser dist/src && \
+    cp template/test-site.sh dist/dist/test-site.sh && \
     cp template/build-site.sh dist/dist/build-site.sh && \
     envsubst < template/container-webhook.service > dist/container-webhook.service
 

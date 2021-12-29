@@ -20,7 +20,7 @@ services:
       - ../chaos-theme-service/src:/mnt/src
       - ../chaos-content:/mnt/chaos/content
     ports:
-      - "3000:80"
+      - "9100:80"
 
   nginx:
     image: nginx:stable-alpine

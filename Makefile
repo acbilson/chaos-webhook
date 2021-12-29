@@ -26,6 +26,10 @@ build: clean ## builds a local development Docker image
 start: ## starts a local development Docker container for webhook and its deps
 	docker-compose up -d
 
+.PHONY: start-webhook
+start-webhook: ## starts a local development Docker container for the webhook only
+	. ./scripts/start.sh
+
 .PHONY: stop
 stop: ## stops a local development Docker container for webhook and its deps
 	docker-compose down
@@ -33,10 +37,6 @@ stop: ## stops a local development Docker container for webhook and its deps
 .PHONY: test
 test: ## runs the webhook build hook
 	. ./scripts/test.sh
-
-.PHONY: start-webhook
-start-webhook: ## starts a local development Docker container for the webhook only
-	. ./scripts/start.sh
 
 ##############
 # UAT Workflow
@@ -51,11 +51,19 @@ build-uat: clean-uat ## builds a remote UAT Docker image
 	. ./scripts/build.sh uat
 
 .PHONY: deploy-uat
-deploy-uat: ## deploys a remote UAT environment
+deploy-uat: ## deploys a remote UAT pod with webhook and deps
+	. ./scripts/deploy.sh uat 1
+
+.PHONY: deploy-webhook-uat
+deploy-webhook-uat: ## deploys a remote UAT container for webhook
 	. ./scripts/deploy.sh uat
 
 .PHONY: stop-uat
-stop-uat: ## stops a remote UAT environment
+stop-uat: ## stops a remote UAT pod
+	. ./scripts/stop.sh uat 1
+
+.PHONY: stop-webhook-uat
+stop-webhook-uat: ## stops a remote UAT webhook container
 	. ./scripts/stop.sh uat
 
 .PHONY: smoketest
