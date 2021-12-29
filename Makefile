@@ -10,9 +10,33 @@ help: ## show this help
 	sort | \
 	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
+##############
+# Development Workflow
+##############
+
 .PHONY: clean
 clean: ## cleans remnants of the build process
 	. ./scripts/clean.sh dev
+
+.PHONY: build
+build: clean ## builds a local development Docker image
+	. ./scripts/build.sh dev
+
+.PHONY: start
+start: ## starts a local development Docker container for webhook and its deps
+	docker-compose up -d
+
+.PHONY: stop
+stop: ## stops a local development Docker container for webhook and its deps
+	docker-compose down
+
+.PHONY: test
+test: ## runs the webhook build hook
+	. ./scripts/test.sh
+
+.PHONY: start-webhook
+start-webhook: ## starts a local development Docker container for the webhook only
+	. ./scripts/start.sh
 
 ##############
 # UAT Workflow
@@ -46,12 +70,12 @@ smoketest: ## runs smoke tests against the remote UAT environment
 clean-prod: clean ## cleans remnants of the build process on the production machine
 	. ./scripts/clean.sh prod
 
-.PHONY: build
-build: clean-prod ## builds a remote production Docker image
+.PHONY: build-prod
+build-prod: clean-prod ## builds a remote production Docker image
 	. ./scripts/build.sh prod
 
-.PHONY: stop
-stop: ## stops the remote production service
+.PHONY: stop-prod
+stop-prod: ## stops the remote production service
 	. ./scripts/stop.sh prod
 
 .PHONY: deploy

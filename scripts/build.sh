@@ -5,12 +5,28 @@ ENVIRONMENT=$1
 
 case $ENVIRONMENT in
 
+dev)
+
+  echo "creates files from template..."
+  mkdir -p dist && \
+    envsubst < template/hooks-dev.json > dist/hooks.json && \
+    envsubst < template/config-dev.toml > dist/config-dev.toml && \
+    cp template/test-site.sh dist/test-site.sh && \
+    cp -r tagparser dist/src
+
+  echo "builds DEV image"
+    docker build -f Dockerfile \
+      --target=dev \
+    --build-arg EXPOSED_PORT=${EXPOSED_PORT} \
+      -t acbilson/webhook-dev:alpine .
+;;
+
 uat)
 
   echo "creates files from template..."
   echo "${UAT_BRANCH}"
   mkdir -p dist/dist && \
-    envsubst < template/hooks-uat.json > dist/dist/hooks.json && \
+    envsubst < template/hooks.json > dist/dist/hooks.json && \
     envsubst < template/config-uat.toml > dist/dist/config-uat.toml && \
     envsubst < template/config-prod.toml > dist/dist/config-prod.toml && \
     cp -r tagparser dist/src && \
@@ -34,7 +50,7 @@ uat)
 prod)
   echo "creates files from template..."
   mkdir -p dist/dist && \
-    envsubst < template/hooks-prod.json > dist/dist/hooks.json && \
+    envsubst < template/hooks.json > dist/dist/hooks.json && \
     envsubst < template/config-prod.toml > dist/dist/config-prod.toml && \
     envsubst < template/config-uat.toml > dist/dist/config-uat.toml && \
     cp -r tagparser dist/src && \

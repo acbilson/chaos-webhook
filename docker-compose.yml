@@ -1,0 +1,34 @@
+version: '3.7'
+services:
+
+  webhook:
+    image: acbilson/webhook-dev:alpine
+    container_name: webhook
+    volumes:
+      - dist:/var/www/site
+      - ../chaos-content:/mnt/hugo/content
+      - ../chaos-theme:/mnt/hugo/themes/chaos
+    ports:
+      - "9000:9000"
+
+  chaos-theme-service:
+    image: acbilson/chaos-theme-service-dev:alpine
+    container_name: chaos-theme-service
+    environment:
+      - FLASK_SECRET_KEY="test-key"
+    volumes:
+      - ../chaos-theme-service/src:/mnt/src
+      - ../chaos-content:/mnt/chaos/content
+    ports:
+      - "3000:80"
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    volumes:
+      - dist:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+
+volumes:
+  dist:
