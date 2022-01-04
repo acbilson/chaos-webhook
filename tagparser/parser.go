@@ -37,7 +37,8 @@ type Nodes struct {
 func main() {
 
 	rootFlag := flag.String("root", "../../chaos-content", "starting point for the command")
-	dirsFlag := flag.String("dirs", "notes,posts/achievements,posts/insights,posts/letters,posts/recommendations,posts/resources,posts/stories", "comma-separated list of folders to pull tags")
+	dirsFlag := flag.String("dirs", "plants/business,plants/faith,plants/identity,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing", "comma-separated list of folders to pull tags")
+
 	outFlag := flag.String("output", "diagram.json", "file path to write json")
 	flag.Parse()
 
