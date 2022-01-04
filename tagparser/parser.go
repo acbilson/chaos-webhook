@@ -2,8 +2,7 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
-	"flag"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,54 +10,64 @@ import (
 	"strings"
 )
 
-type Tag struct {
-	Folder string
-	Count  int
-	Near   []string
-}
-
-type Node struct {
-	Name  string `json:"name"`
-	Type  string `json:"type"`
-	Count int    `json:"count"`
-	Path  string `json:"path"`
-}
-
-type Link struct {
-	Source string `json:"source"`
-	Target string `json:"target"`
-}
-
-type Nodes struct {
-	Nodes []Node `json:"nodes"`
-	Links []Link `json:"links"`
-}
-
-func main() {
-
-	rootFlag := flag.String("root", "../../chaos-content", "starting point for the command")
-	dirsFlag := flag.String("dirs", "plants/business,plants/faith,plants/identity,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing", "comma-separated list of folders to pull tags")
-
-	outFlag := flag.String("output", "diagram.json", "file path to write json")
-	flag.Parse()
-
-	var allTagsMap []map[string]Tag
-
-	for _, folder := range strings.Split(*dirsFlag, ",") {
-		path := filepath.Join(*rootFlag, folder)
-		tagMap := readTagsInPath(path, folder)
-		allTagsMap = append(allTagsMap, tagMap)
+func firstWord(l string) (string, error) {
+		i := strings.IndexRune(l, ' ')
+		if i != -1 {
+			return l[0:i], nil
+		} else {
+			msg := fmt.Sprintf("No first word in: %s", l)
+			return "", errors.New(msg)
+		}
 	}
 
-	everything := merge(allTagsMap)
-	data := convertToNodes(everything)
-	content, err := json.Marshal(data)
-
-	if err != nil {
-		fmt.Println("Error parsing to json", err)
+func parseFrontMatter(matter []string) (FrontMatter, error) {
+	fm := FrontMatter{
+		Author: "",
+		Date: "",
+		LastMod: "",
+		Epistemic: "",
+		InReplyTo: "",
+		TOC: false,
+		Tags: make([]string, 0),
 	}
 
-	writeToFile(content, *outFlag)
+	trim := func(s int, l string) string {
+		if s < len(l) {
+			return strings.Trim(l[s:], "\"")
+		} else { return "" }
+	}
+
+	for _, line := range matter {
+		word, err := firstWord(line)
+		if err != nil {
+			return fm, err
+		}
+
+		switch word {
+			case "author":
+				fm.Author = trim(len("author = "), line)
+			case "date":
+				fm.Date = trim(len("date = "), line)
+			case "lastmod":
+				fm.LastMod = trim(len("lastmod = "), line)
+			case "in-reply-to":
+				fm.InReplyTo = trim(len("in-reply-to = "), line)
+			case "epistemic":
+				val := trim(len("epistemic = "), line)
+				fm.Epistemic = EpistemicType(val)
+			case "tags":
+				fm.Tags = parseTags(line)
+			case "toc":
+				fm.TOC = true
+			case "title":
+				fm.Title = trim(len("title = "), line)
+			default:
+				msg := fmt.Sprintf("%s is not a handled key", word)
+				return fm, errors.New(msg)
+		}
+	}
+
+	return fm, nil
 }
 
 func merge(maps []map[string]Tag) map[string]Tag {
