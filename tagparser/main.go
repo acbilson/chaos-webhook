@@ -14,20 +14,23 @@ func main() {
 	dirsFlag := flag.String("dirs", "plants/business,plants/faith,plants/identity,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing", "comma-separated list of folders to pull tags")
 
 	outFlag := flag.String("output", "diagram.json", "file path to write json")
-	debug := flag.Bool("debug", false, "run the program in debug mode")
+	debugFlag := flag.Bool("debug", false, "run the program in debug mode")
 	flag.Parse()
+
+  fmt.Printf("\nwrites file to %s", *outFlag)
+  fmt.Printf("\nfor folders: %s", *dirsFlag)
 
 	filePaths := getAbsolutePathsInDirectories(*rootFlag, *dirsFlag)
 
-	fmt.Printf("total files: %d", len(filePaths))
-	if *debug == true {
+	fmt.Printf("\ntotal files: %d", len(filePaths))
+	if *debugFlag == true {
 		fmt.Printf("\nexamples: %s", strings.Join(filePaths[0:5], "\n"))
 	}
 
 	frontMatters := getFrontMatterForFiles(filePaths)
 
 	fmt.Printf("\ntotal front matters: %d", len(frontMatters))
-	if *debug == true {
+	if *debugFlag == true {
 		fmt.Print("\nexamples:")
 		for _, example := range frontMatters[0:5] {
 			fmt.Printf("\n%v", example)
@@ -36,7 +39,7 @@ func main() {
 
 	nodes := MapFrontMatterToNode(frontMatters)
 
-	if *debug == true {
+	if *debugFlag == true {
 		fmt.Printf("\nexample nodes:")
 		for _, example := range nodes[20:30] {
 			fmt.Printf("\n%v", example)
@@ -45,7 +48,7 @@ func main() {
 
 	links := MapFrontMatterToLink(frontMatters)
 
-	if *debug == true {
+	if *debugFlag == true {
 		fmt.Printf("\nexample link:")
 		for _, example := range links {
 			fmt.Printf("\n%v", example)
