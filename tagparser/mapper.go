@@ -5,6 +5,8 @@ import (
 	"sort"
 )
 
+var exists = struct{}{}
+
 func MapFrontMatterToNode(fms []FrontMatter) []Node {
 	nodes := make([]Node, 0)
 	matterMap := make(map[string]int)

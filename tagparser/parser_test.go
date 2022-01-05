@@ -20,7 +20,10 @@ func TestIsTagLine(t *testing.T) {
 
 func TestParseTags(t *testing.T) {
 	var tests = map[string][]string{
-		"tags = [fake,tags]": {"fake", "tags"},
+		"tags = [fake,tags]":          {"fake", "tags"},
+		"tags = [fake, tags]":         {"fake", "tags"},
+		"tags = [\"fake\",\"tags\"]":  {"fake", "tags"},
+		"tags = [\"fake\", \"tags\"]": {"fake", "tags"},
 	}
 
 	for tags, want := range tests {

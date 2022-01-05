@@ -14,46 +14,49 @@ func main() {
 	dirsFlag := flag.String("dirs", "plants/business,plants/faith,plants/identity,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing", "comma-separated list of folders to pull tags")
 
 	outFlag := flag.String("output", "diagram.json", "file path to write json")
+	debug := flag.Bool("debug", false, "run the program in debug mode")
 	flag.Parse()
 
 	filePaths := getAbsolutePathsInDirectories(*rootFlag, *dirsFlag)
 
 	fmt.Printf("total files: %d", len(filePaths))
-	fmt.Printf("\nexamples: %s", strings.Join(filePaths[0:5], "\n"))
+	if *debug == true {
+		fmt.Printf("\nexamples: %s", strings.Join(filePaths[0:5], "\n"))
+	}
 
 	frontMatters := getFrontMatterForFiles(filePaths)
 
 	fmt.Printf("\ntotal front matters: %d", len(frontMatters))
-	fmt.Print("\nexamples:")
-	for _, example := range frontMatters[0:5] {
-		fmt.Printf("\n%v", example)
+	if *debug == true {
+		fmt.Print("\nexamples:")
+		for _, example := range frontMatters[0:5] {
+			fmt.Printf("\n%v", example)
+		}
 	}
 
 	nodes := MapFrontMatterToNode(frontMatters)
 
-	fmt.Printf("\nexample nodes:")
-	for _, example := range nodes[20:30] {
-		fmt.Printf("\n%v", example)
+	if *debug == true {
+		fmt.Printf("\nexample nodes:")
+		for _, example := range nodes[20:30] {
+			fmt.Printf("\n%v", example)
+		}
 	}
 
 	links := MapFrontMatterToLink(frontMatters)
 
-	fmt.Printf("\nexample link:")
-	for _, example := range links {
-		fmt.Printf("\n%v", example)
+	if *debug == true {
+		fmt.Printf("\nexample link:")
+		for _, example := range links {
+			fmt.Printf("\n%v", example)
+		}
 	}
 
-	var allTagsMap []map[string]Tag
-
-	for _, folder := range strings.Split(*dirsFlag, ",") {
-		path := filepath.Join(*rootFlag, folder)
-		tagMap := readTagsInPath(path, folder)
-		allTagsMap = append(allTagsMap, tagMap)
-	}
-
-	everything := merge(allTagsMap)
-	data := convertToNodes(everything)
-	content, err := json.Marshal(data)
+	content, err := json.Marshal(
+		Diagram{
+			Nodes: nodes,
+			Links:links,
+	})
 
 	if err != nil {
 		fmt.Println("Error parsing to json", err)
