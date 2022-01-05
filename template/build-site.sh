@@ -171,6 +171,10 @@ echo "################"
   --cleanDestinationDir
 
 if [ $BUILD_TAGS == 1 ]; then
+  echo "\nremoving existing network tags"
+  echo "################"
+  rm -f $DIST_PATH/network/diagram.json
+
   echo "\nbuilding network tags"
   echo "################"
   /usr/local/bin/tagparser \
