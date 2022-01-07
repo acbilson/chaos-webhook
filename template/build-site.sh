@@ -179,6 +179,6 @@ if [ $BUILD_TAGS == 1 ]; then
   echo "################"
   /usr/local/bin/tagparser \
     --root /mnt/chaos/content \
-    --dirs "plants/business,plants/faith,plants/identity,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing" \
+    --dirs "plants/business,plants/culture,plants/entrepreneurship,plants/faith,plants/identity,plants/leadership,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing" \
     --output $DIST_PATH/network/diagram.json
 fi
