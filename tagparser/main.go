@@ -11,7 +11,7 @@ import (
 func main() {
 
 	rootFlag := flag.String("root", "../../chaos-content", "starting point for the command")
-	dirsFlag := flag.String("dirs", "plants/business,plants/faith,plants/identity,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing", "comma-separated list of folders to pull tags")
+	dirsFlag := flag.String("dirs", "plants/business,plants/culture,plants/entrepreneurship,plants/faith,plants/identity,plants/leadership,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing", "comma-separated list of folders to pull tags")
 
 	outFlag := flag.String("output", "diagram.json", "file path to write json")
 	debugFlag := flag.Bool("debug", false, "run the program in debug mode")
