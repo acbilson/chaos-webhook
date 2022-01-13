@@ -158,7 +158,7 @@ esac
 if [ -d /tmp/hugo_cache ]; then
   echo "\n\nclearing hugo cache from last build"
   echo "################"
-  rm -rf /tmp/hugo_cache
+  /bin/rm -rf /tmp/hugo_cache
 fi
 
 echo "\nbuilding site from $BRANCH to $DIST_PATH"
@@ -173,7 +173,7 @@ echo "################"
 if [ $BUILD_TAGS == 1 ]; then
   echo "\nremoving existing network tags"
   echo "################"
-  rm -f $DIST_PATH/network/diagram.json
+  /bin/rm -f $DIST_PATH/network/diagram.json
 
   echo "\nbuilding network tags"
   echo "################"
