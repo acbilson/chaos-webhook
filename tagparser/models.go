@@ -13,6 +13,7 @@ const (
 type FrontMatter struct {
 	Title     string        `json:"title"`
 	Author    string        `json:"author"`
+	Alias     string        `json:"alias"`
 	Date      string        `json:"date"`
 	LastMod   string        `json:"lastmod"`
 	InReplyTo string        `json:"in-reply-to"`

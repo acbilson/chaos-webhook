@@ -19,6 +19,7 @@ func firstWord(l string) (string, error) {
 func parseFrontMatter(matter []string) (FrontMatter, error) {
 	fm := FrontMatter{
 		Author:    "",
+		Alias:     "",
 		Date:      "",
 		LastMod:   "",
 		Epistemic: "",
@@ -59,6 +60,8 @@ func parseFrontMatter(matter []string) (FrontMatter, error) {
 			fm.TOC = true
 		case "title":
 			fm.Title = trim(len("title = "), line)
+		case "aliases":
+			fm.Alias = trim(len("aliases = "), line)
 		default:
 			msg := fmt.Sprintf("%s is not a handled key", word)
 			return fm, errors.New(msg)
