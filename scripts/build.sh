@@ -65,15 +65,15 @@ prod)
   cp Dockerfile dist/
 
   echo "distributes dist/ folder..."
-  scp -r dist ${PROD_HOST}:/mnt/msata/build/prod
+  scp -r dist ${PROD_HOST}:${BUILD_PATH}/prod
 
   echo "builds image on production"
   ssh -t ${PROD_HOST} \
     sudo podman build \
-      -f /mnt/msata/build/prod/Dockerfile \
+      -f ${BUILD_PATH}/prod/Dockerfile \
       --target=prod \
       -t acbilson/webhook:alpine \
-      /mnt/msata/build/prod
+      ${BUILD_PATH}/prod
 ;;
 
 *)
