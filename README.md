@@ -1,5 +1,3 @@
-# chaos-webhook
-
 A webhook-triggered service for alexbilson.dev. Builds my own container to use Adnan's webhook.
 
 
