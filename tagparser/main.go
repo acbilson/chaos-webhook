@@ -17,8 +17,8 @@ func main() {
 	debugFlag := flag.Bool("debug", false, "run the program in debug mode")
 	flag.Parse()
 
-  fmt.Printf("\nwrites file to %s", *outFlag)
-  fmt.Printf("\nfor folders: %s", *dirsFlag)
+	fmt.Printf("\nwrites file to %s", *outFlag)
+	fmt.Printf("\nfor folders: %s", *dirsFlag)
 
 	filePaths := getAbsolutePathsInDirectories(*rootFlag, *dirsFlag)
 

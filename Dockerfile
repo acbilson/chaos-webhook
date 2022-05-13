@@ -1,6 +1,6 @@
 # Dockerfile for https://github.com/adnanh/webhook
 # example modified from https://almir/docker-webhook
-FROM        golang:alpine3.14 AS build
+FROM        docker.io/library/golang:alpine3.14 AS build
 ENV         WEBHOOK_VERSION 2.8.0
 
 # add build deps
@@ -18,51 +18,42 @@ COPY        src /go/src/tagparser
 WORKDIR     /go/src/tagparser
 RUN         go version && go install
 
-FROM        alpine:3.14 as base
+FROM        docker.io/library/alpine:3.14 as base
 COPY        --from=build /usr/local/bin/webhook /usr/local/bin/webhook
 COPY        --from=build /go/bin/tagparser /usr/local/bin/tagparser
 RUN         apk add hugo git
 
 FROM base as dev
 
-# adds hooks
-COPY        dist/hooks.json /etc/webhook/
-
 # adds site build script
-COPY        dist/test-site.sh /usr/local/bin/
+COPY        template/test-site.sh /usr/local/bin/
 RUN         chmod +x /usr/local/bin/test-site.sh
 
 # adds hugo configs
-COPY        dist/config-dev.toml /etc/hugo/
+COPY        template/config-dev.toml /etc/hugo/
 
 ENTRYPOINT  ["/usr/local/bin/webhook", "-debug", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
 
 FROM        base as uat
 
-# adds hooks
-COPY        dist/hooks.json /etc/webhook/
-
 # adds site build script
-COPY        dist/build-site.sh /usr/local/bin/
+COPY        template/build-site.sh /usr/local/bin/
 RUN         chmod +x /usr/local/bin/build-site.sh
 
 # adds hugo configs
-COPY        dist/config-prod.toml /etc/hugo/
-COPY        dist/config-uat.toml /etc/hugo/
+COPY        template/config-prod.toml /etc/hugo/
+COPY        template/config-uat.toml /etc/hugo/
 
 ENTRYPOINT  ["/usr/local/bin/webhook", "-debug", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
 
 FROM        base as prod
 
-# adds hooks
-COPY        dist/hooks.json /etc/webhook/
-
 # adds site build script
-COPY        dist/build-site.sh /usr/local/bin/
+COPY        template/build-site.sh /usr/local/bin/
 RUN         chmod +x /usr/local/bin/build-site.sh
 
 # adds hugo configs
-COPY        dist/config-prod.toml /etc/hugo/
-COPY        dist/config-uat.toml /etc/hugo/
+COPY        template/config-prod.toml /etc/hugo/
+COPY        template/config-uat.toml /etc/hugo/
 
 ENTRYPOINT  ["/usr/local/bin/webhook", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
