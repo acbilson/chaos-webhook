@@ -14,7 +14,7 @@ RUN         curl -L --silent -o webhook.tar.gz https://github.com/adnanh/webhook
             go build -o /usr/local/bin/webhook
 
 # build the tagparser project
-COPY        src /go/src/tagparser
+COPY        tagparser /go/src/tagparser
 WORKDIR     /go/src/tagparser
 RUN         go version && go install
 
