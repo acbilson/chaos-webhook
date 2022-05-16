@@ -21,7 +21,7 @@ RUN         go version && go install
 FROM        docker.io/library/alpine:3.14 as base
 COPY        --from=build /usr/local/bin/webhook /usr/local/bin/webhook
 COPY        --from=build /go/bin/tagparser /usr/local/bin/tagparser
-RUN         apk add hugo git
+RUN         apk add hugo git openssh
 
 FROM base as dev
 
