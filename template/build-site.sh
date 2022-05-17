@@ -1,4 +1,5 @@
 #!/bin/sh
+export GIT_SSH_COMMAND="/usr/bin/ssh -i /root/.ssh/git_rsa"
 
 REF=$1
 REPO=$2
