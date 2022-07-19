@@ -40,10 +40,6 @@ FROM        base as uat
 COPY        template/build-site.sh /usr/local/bin/
 RUN         chmod +x /usr/local/bin/build-site.sh
 
-# adds hugo configs
-COPY        template/config-prod.toml /etc/hugo/
-COPY        template/config-uat.toml /etc/hugo/
-
 ENTRYPOINT  ["/usr/local/bin/webhook", "-debug", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
 
 FROM        base as prod
@@ -51,9 +47,5 @@ FROM        base as prod
 # adds site build script
 COPY        template/build-site.sh /usr/local/bin/
 RUN         chmod +x /usr/local/bin/build-site.sh
-
-# adds hugo configs
-COPY        template/config-prod.toml /etc/hugo/
-COPY        template/config-uat.toml /etc/hugo/
 
 ENTRYPOINT  ["/usr/local/bin/webhook", "-verbose", "-hooks", "/etc/webhook/hooks.json"]

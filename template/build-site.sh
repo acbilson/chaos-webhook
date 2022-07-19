@@ -38,13 +38,13 @@ case $REF in
   refs/heads/master)
     BRANCH=master
     DIST_PATH=/var/www/site
-    CONFIG_PATH=/etc/hugo/config-prod.toml
+    CONFIG_PATH=/usr/local/bin/config-prod.toml
   ;;
 
   refs/heads/release/*)
     BRANCH="release/$(/usr/bin/basename $REF)"
     DIST_PATH=/var/www/uat
-    CONFIG_PATH=/etc/hugo/config-uat.toml
+    CONFIG_PATH=/usr/local/bin/config-uat.toml
   ;;
 
   *)
