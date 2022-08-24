@@ -1,0 +1,3 @@
+# runs the program locally
+start:
+	cargo run
