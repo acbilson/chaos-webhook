@@ -32,6 +32,7 @@ case $REPO in
 esac
 
 # Verifies that the branch ref is supported for webhook
+# deploys to production either way, for now
 ####
 case $REF in
 
@@ -43,8 +44,8 @@ case $REF in
 
   refs/heads/release/*)
     BRANCH="release/$(/usr/bin/basename $REF)"
-    DIST_PATH=/var/www/uat
-    CONFIG_PATH=/etc/webhook/config-uat.toml
+    DIST_PATH=/var/www/site
+    CONFIG_PATH=/etc/webhook/config-prod.toml
   ;;
 
   *)
