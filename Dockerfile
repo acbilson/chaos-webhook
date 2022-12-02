@@ -48,4 +48,7 @@ FROM        base as prod
 COPY        template/build-site.sh /usr/local/bin/
 RUN         chmod +x /usr/local/bin/build-site.sh
 
+# configures git
+RUN git config --global user.name "Webhook Bot" && git config --global user.email "webhook@bot.dev" && git config --global core.autoclrf "true" && git config --global pull.rebase "true"
+
 ENTRYPOINT  ["/usr/local/bin/webhook", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
