@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 regex = "1.6.0"
 toml = "0.5.9"
+walkdir = "2"
 
 [[bin]]
 name = "tagparser_r"
