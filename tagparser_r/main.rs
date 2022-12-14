@@ -3,10 +3,10 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::env;
 use std::fs;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
-use std::env;
 
 #[derive(Serialize, Deserialize)]
 struct Backref {
@@ -39,31 +39,39 @@ fn get_backref_source(start_dir: &str) -> HashMap<String, Vec<String>> {
         if is_markdown(&entry) {
             let file_path = entry.into_path();
             let content = fs::read_to_string(&file_path).expect("content is readable");
+            let referrer = file_path.to_str().unwrap().to_string();
 
-            // generates backref source HashMap
-            for backref_captures in re.captures_iter(&content) {
-                // always matches one
-                if backref_captures.len() > 1 {
-                    let reference = format!(
-                        "{}.md",
-                        &backref_captures["src"].replace("\"", "").to_string()
-                    );
+            add_to_backrefs(&re, &referrer, &content, &mut backrefs);
+        }
+    }
+    return backrefs;
+}
 
-                    let referrer = file_path.to_str().unwrap().to_string();
+fn add_to_backrefs(
+    re: &Regex,
+    referrer: &str,
+    content: &str,
+    backrefs: &mut HashMap<String, Vec<String>>,
+) {
+    // generates backref source HashMap
+    for backref_captures in re.captures_iter(&content) {
+        // always matches one
+        if backref_captures.len() > 1 {
+            let reference = format!(
+                "{}.md",
+                &backref_captures["src"].replace("\"", "").to_string()
+            );
 
-                    match backrefs.entry(reference) {
-                        Entry::Vacant(e) => {
-                            e.insert(vec![referrer]);
-                        }
-                        Entry::Occupied(mut e) => {
-                            e.get_mut().push(referrer);
-                        }
-                    }
+            match backrefs.entry(reference) {
+                Entry::Vacant(e) => {
+                    e.insert(vec![referrer.to_string()]);
+                }
+                Entry::Occupied(mut e) => {
+                    e.get_mut().push(referrer.to_string());
                 }
             }
         }
     }
-    return backrefs;
 }
 
 fn convert_to_json(source: &HashMap<String, Vec<String>>) -> String {
