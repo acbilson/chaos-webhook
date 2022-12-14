@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::fs;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
+use std::env;
 
 #[derive(Serialize, Deserialize)]
 struct Backref {
@@ -14,12 +15,15 @@ struct Backref {
 }
 
 fn main() {
-    let source = get_backref_source();
+    let args: Vec<String> = env::args().collect();
+    let start_dir = &args[1];
+
+    let source = get_backref_source(&start_dir);
     let backrefs = convert_to_json(&source);
     fs::write("output/data.json", &backrefs).expect("writes data to data.json");
 }
 
-fn get_backref_source() -> HashMap<String, Vec<String>> {
+fn get_backref_source(start_dir: &str) -> HashMap<String, Vec<String>> {
     // [^\s]+ = puts the first word unbroken by a space into the "src" pattern
     let re = Regex::new(r"\{\{< backref.*src=(?P<src>[^\s]+) >\}\}").unwrap();
 
@@ -30,7 +34,7 @@ fn get_backref_source() -> HashMap<String, Vec<String>> {
     let mut backrefs: HashMap<String, Vec<String>> = HashMap::new();
 
     // e.ok() skips files the program can't open (insufficient permissions for example)
-    for entry in WalkDir::new("data").into_iter().filter_map(|e| e.ok()) {
+    for entry in WalkDir::new(start_dir).into_iter().filter_map(|e| e.ok()) {
         if is_markdown(&entry) {
             let file_path = entry.into_path();
             let content = fs::read_to_string(&file_path).expect("content is readable");
