@@ -17,10 +17,11 @@ struct Backref {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let start_dir = &args[1];
+    let out_dir = &args[2];
 
     let source = get_backref_source(&start_dir);
     let backrefs = convert_to_json(&source);
-    fs::write("output/data.json", &backrefs).expect("writes data to data.json");
+    fs::write(format!("{}/data.json", &out_dir), &backrefs).expect("writes data to data.json");
 }
 
 fn get_backref_source(start_dir: &str) -> HashMap<String, Vec<String>> {

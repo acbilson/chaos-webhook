@@ -4,4 +4,4 @@ clean:
 
 # runs the program locally
 start:
-	cargo run data
+	cargo run data output
