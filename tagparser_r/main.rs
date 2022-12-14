@@ -14,10 +14,69 @@ struct Backref {
     sources: Vec<String>,
 }
 
+#[derive(Serialize, Deserialize, Default, Debug)]
+struct Syndicated {
+    mastodon: String
+}
+
+impl Syndicated {
+    fn new() -> Self {
+        Default::default()
+    }
+}
+
+impl PartialEq for Syndicated {
+    fn eq(&self, o: &Self) -> bool {
+        self.mastodon == o.mastodon
+    }
+}
+
+impl Eq for Syndicated {}
+
+#[derive(Serialize, Deserialize, Default, Debug)]
+struct FrontMatter {
+    author: Option<String>,
+    date: Option<String>,
+    lastmod: Option<String>,
+    epistemic: Option<String>,
+    tags: Option<Vec<String>>,
+    syndicate: Option<bool>,
+    syndicated: Option<Syndicated>,
+
+    #[serde(alias = "in-reply-to")]
+    inreplyto: Option<String>
+}
+
+impl FrontMatter {
+    fn new() -> Self {
+        Default::default()
+    }
+}
+
+impl PartialEq for FrontMatter {
+    fn eq(&self, o: &Self) -> bool {
+        self.author == o.author && self.date == o.date && self.lastmod == o.lastmod && self.epistemic == o.epistemic && self.tags == o.tags && self.syndicate == o.syndicate && self.syndicated == o.syndicated
+    }
+}
+impl Eq for FrontMatter {}
+
+#[derive(Debug)]
+    pub enum FrontMatterError {
+        MissingTomlTags,
+        NotValidToml,
+    }
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let start_dir = &args[1];
     let out_dir = &args[2];
+
+    let content = concat!(
+    "+++\n",
+    "name = \"Alex\"\n",
+    "male = true\n",
+    "+++\n",
+    );
 
     let source = get_backref_source(&start_dir);
     let backrefs = convert_to_json(&source);
@@ -41,6 +100,8 @@ fn get_backref_source(start_dir: &str) -> HashMap<String, Vec<String>> {
             let content = fs::read_to_string(&file_path).expect("content is readable");
             let referrer = file_path.to_str().unwrap().to_string();
 
+            let frontmatter = get_frontmatter(&content).expect("parses toml");
+            println!("{:?}", frontmatter);
             add_to_backrefs(&re, &referrer, &content, &mut backrefs);
         }
     }
@@ -88,4 +149,30 @@ fn convert_to_json(source: &HashMap<String, Vec<String>>) -> String {
         backrefs.push(backref_str.to_string());
     }
     return backrefs.join("");
+}
+
+fn get_frontmatter(content: &str) -> Result<FrontMatter, FrontMatterError> {
+
+    let parse_header = |c: &str| -> Result<String, FrontMatterError> {
+        if !c.contains("+++") {
+            return Err(FrontMatterError::MissingTomlTags);
+        }
+        let first_idx: usize = c.find("+++").unwrap();
+        let last_idx: usize = c.rfind("+++").unwrap();
+
+        if first_idx == last_idx {
+            return Err(FrontMatterError::MissingTomlTags);
+        }
+        Ok(String::from(&content[first_idx+3..last_idx]))
+    };
+
+    let header = parse_header(content)?;
+
+    let frontmatter: FrontMatter = toml::from_str(&header).unwrap_or(FrontMatter::new());
+
+    if frontmatter == Default::default() {
+        return Err(FrontMatterError::NotValidToml);
+    }
+
+    Ok(frontmatter)
 }
