@@ -1,3 +1,7 @@
+# cleans the project
+clean:
+	cargo clean
+
 # runs the program locally
 start:
 	cargo run
