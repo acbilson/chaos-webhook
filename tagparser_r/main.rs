@@ -9,7 +9,7 @@ use walkdir::DirEntry;
 use walkdir::WalkDir;
 
 #[derive(Serialize, Deserialize)]
-struct Backref {
+struct ReferenceSet {
     referrer: String,
     sources: Vec<String>,
 }
@@ -17,12 +17,6 @@ struct Backref {
 #[derive(Serialize, Deserialize, Default, Debug)]
 struct Syndicated {
     mastodon: String,
-}
-
-impl Syndicated {
-    fn new() -> Self {
-        Default::default()
-    }
 }
 
 impl PartialEq for Syndicated {
@@ -47,12 +41,6 @@ struct FrontMatter {
     inreplyto: Option<String>,
 }
 
-impl FrontMatter {
-    fn new() -> Self {
-        Default::default()
-    }
-}
-
 impl PartialEq for FrontMatter {
     fn eq(&self, o: &Self) -> bool {
         self.author == o.author
@@ -64,6 +52,7 @@ impl PartialEq for FrontMatter {
             && self.syndicated == o.syndicated
     }
 }
+
 impl Eq for FrontMatter {}
 
 #[derive(Debug)]
@@ -73,8 +62,8 @@ pub enum FrontMatterError {
 }
 
 struct ParseResults {
-    tagsMap: HashMap<String, Vec<String>>,
-    backrefsMap: HashMap<String, Vec<String>>
+    tags_map: HashMap<String, Vec<String>>,
+    backrefs_map: HashMap<String, Vec<String>>,
 }
 
 fn main() {
@@ -84,11 +73,12 @@ fn main() {
 
     let results = parse_files(&start_dir);
 
-    let backrefs = convert_to_json(&results.backrefsMap);
-    let tags = convert_to_json(&results.tagsMap);
+    let backrefs = convert_to_json(&results.backrefs_map);
+    let tags = convert_to_json(&results.tags_map);
 
     fs::write(format!("{}/tags.json", &out_dir), &tags).expect("writes tag data to tags.json");
-    fs::write(format!("{}/backrefs.json", &out_dir), &backrefs).expect("writes backref data to backrefs.json");
+    fs::write(format!("{}/backrefs.json", &out_dir), &backrefs)
+        .expect("writes backref data to backrefs.json");
 }
 
 fn parse_files(start_dir: &str) -> ParseResults {
@@ -110,11 +100,14 @@ fn parse_files(start_dir: &str) -> ParseResults {
             let referrer = file_path.to_str().unwrap().to_string();
 
             let frontmatter = get_frontmatter(&content, &referrer).expect("parses toml");
-            add_to_tags(&referrer, &frontmatter, &mut tags);
+            add_to_tags(&frontmatter, &mut tags);
             add_to_backrefs(&re, &referrer, &content, &mut backrefs);
         }
     }
-    return ParseResults { tagsMap: tags, backrefsMap: backrefs };
+    return ParseResults {
+        tags_map: tags,
+        backrefs_map: backrefs,
+    };
 }
 
 fn add_to_backrefs(
@@ -150,7 +143,7 @@ fn convert_to_json(source: &HashMap<String, Vec<String>>) -> String {
         let mut deduped_sources = value.to_vec();
         deduped_sources.sort();
         deduped_sources.dedup();
-        let backref = Backref {
+        let backref = ReferenceSet {
             referrer: key.to_string(),
             sources: deduped_sources,
         };
@@ -163,7 +156,7 @@ fn convert_to_json(source: &HashMap<String, Vec<String>>) -> String {
     return backrefs.join("");
 }
 
-fn add_to_tags(referrer: &str, frontmatter: &FrontMatter, tags: &mut HashMap<String, Vec<String>>) {
+fn add_to_tags(frontmatter: &FrontMatter, tags: &mut HashMap<String, Vec<String>>) {
     if let Some(current_tags) = &frontmatter.tags {
         let mut sorted_tags = current_tags.to_vec();
         sorted_tags.sort();
