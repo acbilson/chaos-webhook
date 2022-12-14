@@ -16,7 +16,7 @@ struct Backref {
 fn main() {
     let source = get_backref_source();
     let backrefs = convert_to_json(&source);
-    println!("{:?}", backrefs);
+    fs::write("output/data.json", &backrefs).expect("writes data to data.json");
 }
 
 fn get_backref_source() -> HashMap<String, Vec<String>> {
