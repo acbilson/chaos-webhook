@@ -156,6 +156,10 @@ chaos-theme)
 
 esac
 
+echo "\n\nrunning tagparser at /mnt/chaos/content"
+/bin/mkdir -p /mnt/chaos/data
+/usr/local/bin/tagparser /mnt/chaos/content /mnt/chaos/data
+
 if [ -d /tmp/hugo_cache ]; then
   echo "\n\nclearing hugo cache from last build"
   echo "################"
