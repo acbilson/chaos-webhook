@@ -97,7 +97,8 @@ fn parse_files(start_dir: &str) -> ParseResults {
         if is_markdown(&entry) {
             let file_path = entry.into_path();
             let content = fs::read_to_string(&file_path).expect("content is readable");
-            let referrer = file_path.to_str().unwrap().to_string();
+            let path_str = file_path.to_str().unwrap().to_string();
+            let referrer = path_str.trim_start_matches(&start_dir);
 
             let frontmatter = get_frontmatter(&content, &referrer).expect("parses toml");
             add_to_tags(&frontmatter, &mut tags);
@@ -153,7 +154,7 @@ fn convert_to_json(source: &HashMap<String, Vec<String>>) -> String {
         };
         backrefs.push(backref_str.to_string());
     }
-    return backrefs.join("");
+    return format!("[{}]", backrefs.join(","));
 }
 
 fn add_to_tags(frontmatter: &FrontMatter, tags: &mut HashMap<String, Vec<String>>) {

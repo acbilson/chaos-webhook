@@ -15,30 +15,22 @@ RUN     curl -L --silent -o webhook.tar.gz https://github.com/adnanh/webhook/arc
 
 FROM docker.io/library/rust:alpine3.14 AS build-tagparser
 
+# adds serde_deribe build dep
+RUN apk add musl-dev
+
 # build the tagparser project
 COPY tagparser /go/src/tagparser
-RUN  /root/.cargo/bin/cargo install --path /go/src/tagparser
+RUN  cargo install --path /go/src/tagparser
 
 FROM docker.io/library/alpine:3.14 as base
 COPY --from=build-webhook /usr/local/bin/webhook /usr/local/bin/webhook
-COPY --from=build-tagparser /root/.cargo/bin/tagparser /usr/local/bin/tagparser
+COPY --from=build-tagparser /usr/local/cargo/bin/tagparser /usr/local/bin/tagparser
 RUN  apk add hugo git openssh
 
 FROM base as dev
 
 # adds site build script
-COPY template/test-site.sh /usr/local/bin/
-RUN  chmod +x /usr/local/bin/test-site.sh
-
-# adds hugo configs
-COPY template/config-dev.toml /etc/hugo/
-
-ENTRYPOINT ["/usr/local/bin/webhook", "-debug", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
-
-FROM base as uat
-
-# adds site build script
-COPY template/build-site.sh /usr/local/bin/
+COPY template/test-site.sh /usr/local/bin/build-site.sh
 RUN  chmod +x /usr/local/bin/build-site.sh
 
 ENTRYPOINT ["/usr/local/bin/webhook", "-debug", "-verbose", "-hooks", "/etc/webhook/hooks.json"]
