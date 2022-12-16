@@ -169,7 +169,9 @@ fi
 
 echo "\nbuilding site from $BRANCH to $DIST_PATH"
 echo "################"
-/usr/bin/hugo \
+
+# to load JSON in the /data folder we must change the folder root
+cd /mnt/chaos && /usr/bin/hugo \
   -d $DIST_PATH \
   --config $CONFIG_PATH \
   --contentDir /mnt/chaos/content \
