@@ -157,7 +157,7 @@ chaos-theme)
 
 esac
 
-echo "\n\nrunning tagparser at /mnt/chaos/content"
+echo "\n\nrunning tagparser from /mnt/chaos/content" to /mnt/chaos/data
 /bin/mkdir -p /mnt/chaos/data
 /usr/local/bin/tagparser /mnt/chaos/content /mnt/chaos/data
 
@@ -175,16 +175,3 @@ echo "################"
   --contentDir /mnt/chaos/content \
   --themesDir /mnt/chaos/themes \
   --cleanDestinationDir
-
-if [ $BUILD_TAGS == 1 ]; then
-  echo "\nremoving existing network tags"
-  echo "################"
-  /bin/rm -f $DIST_PATH/network/diagram.json
-
-  echo "\nbuilding network tags"
-  echo "################"
-  /usr/local/bin/tagparser \
-    --root /mnt/chaos/content \
-    --dirs "plants/business,plants/culture,plants/entrepreneurship,plants/faith,plants/identity,plants/leadership,plants/meta,plants/parenting,plants/science,plants/technology,plants/writing" \
-    --output $DIST_PATH/network/diagram.json
-fi
