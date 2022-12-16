@@ -1,0 +1,32 @@
+[
+	{
+		"id": "content-pull-webhook",
+		"execute-command": "/usr/local/bin/build-site.sh",
+		"command-working-directory": "/mnt/chaos",
+    "pass-arguments-to-command": [
+    {
+      "source": "payload",
+      "name": "ref"
+    },
+    {
+      "source": "payload",
+      "name": "repository.name"
+    }
+    ]
+  },
+	{
+		"id": "theme-pull-webhook",
+		"execute-command": "/usr/local/bin/build-site.sh",
+		"command-working-directory": "/mnt/chaos",
+    "pass-arguments-to-command": [
+    {
+      "source": "payload",
+      "name": "ref"
+    },
+    {
+      "source": "payload",
+      "name": "repository.name"
+    }
+    ]
+	}
+]
