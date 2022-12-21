@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{FrontMatterError, ReferenceSet};
+use crate::{FrontMatter, FrontMatterError, ReferenceSet};
 
 pub fn hashmap_to_json(source: &HashMap<String, Vec<String>>) -> String {
     let mut backrefs: Vec<String> = Vec::new();
@@ -32,6 +32,21 @@ pub fn get_toml_header(content: &str) -> Result<String, FrontMatterError> {
         return Err(FrontMatterError::MissingTomlTags);
     }
     Ok(String::from(&content[first_idx + 3..last_idx]))
+}
+
+pub fn get_frontmatter(content: &str, file_name: &str) -> Result<FrontMatter, FrontMatterError> {
+    let header = get_toml_header(content)?;
+
+    // converts toml error to my custom error type
+    let frontmatter: FrontMatter = toml::from_str(&header).map_err(|e| {
+        FrontMatterError::NotValidToml(format!(
+            "file {} parse failure: {}",
+            file_name,
+            e.to_string()
+        ))
+    })?;
+
+    Ok(frontmatter)
 }
 
 #[cfg(test)]

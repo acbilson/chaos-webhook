@@ -43,8 +43,8 @@ fn parse_files(start_dir: &str) -> ParseResults {
             let path_str = file_path.to_str().unwrap().to_string();
             let referrer = path_str.trim_start_matches(&start_dir);
 
-            let frontmatter = get_frontmatter(&content, &referrer).expect("parses toml");
-            add_to_tags(&frontmatter, &mut tags);
+            let frontmatter = operators::get_frontmatter(&content, &referrer).expect("parses toml");
+            add_to_tags(frontmatter.tags, &mut tags);
             add_to_backrefs(&re, &referrer, &content, &mut backrefs);
         }
     }
@@ -81,8 +81,8 @@ fn add_to_backrefs(
     }
 }
 
-fn add_to_tags(frontmatter: &FrontMatter, tags: &mut HashMap<String, Vec<String>>) {
-    if let Some(current_tags) = &frontmatter.tags {
+fn add_to_tags(new_tags: Option<Vec<String>>, tags: &mut HashMap<String, Vec<String>>) {
+    if let Some(current_tags) = new_tags {
         let mut sorted_tags = current_tags.to_vec();
         sorted_tags.sort();
 
@@ -104,49 +104,24 @@ fn add_to_tags(frontmatter: &FrontMatter, tags: &mut HashMap<String, Vec<String>
     }
 }
 
-fn get_frontmatter(content: &str, file_name: &str) -> Result<FrontMatter, FrontMatterError> {
-    let header = operators::get_toml_header(content)?;
-
-    // converts toml error to my custom error type
-    let frontmatter: FrontMatter = toml::from_str(&header).map_err(|e| {
-        FrontMatterError::NotValidToml(format!(
-            "file {} parse failure: {}",
-            file_name,
-            e.to_string()
-        ))
-    })?;
-
-    Ok(frontmatter)
-}
-
 #[cfg(test)]
 mod main_tests {
     use std::collections::HashMap;
 
     use crate::add_to_tags;
-    use crate::FrontMatter;
 
     #[test]
-    fn adds_frontmatter_to_tags() {
+    fn add_to_tags_adds_fresh_tags() {
         // arrange
-        let fm = FrontMatter {
-            author: None,
-            date: None,
-            lastmod: None,
-            epistemic: None,
-            syndicate: None,
-            syndicated: None,
-            inreplyto: None,
-            tags: Some(vec![
-                String::from("writing"),
-                String::from("style"),
-                String::from("pattern"),
-            ]),
-        };
+        let new_tags = Some(vec![
+            String::from("writing"),
+            String::from("style"),
+            String::from("pattern"),
+        ]);
 
         // act
         let mut tags: HashMap<String, Vec<String>> = HashMap::new();
-        add_to_tags(&fm, &mut tags);
+        add_to_tags(new_tags, &mut tags);
 
         // assert
         let expected_keys = ["writing", "style", "pattern"];
@@ -154,6 +129,44 @@ mod main_tests {
         let expected_values = HashMap::from([
             ("style", vec!["pattern", "writing"]),
             ("writing", vec!["pattern", "style"]),
+            ("pattern", vec!["style", "writing"]),
+        ]);
+
+        for &key in &expected_keys {
+            // assert key in map
+            match tags.get(key) {
+                Some(value) => assert_eq!(value, expected_values.get(key).unwrap()),
+                None => panic!("key {} not present in tags", key),
+            }
+        }
+    }
+
+    #[test]
+    fn add_to_tags_adds_multiple_tags() {
+        // arrange
+        let multiple_tags = [
+            Some(vec![String::from("writing"), String::from("organization")]),
+            Some(vec![
+                String::from("writing"),
+                String::from("style"),
+                String::from("pattern"),
+            ]),
+        ];
+
+        // act
+        let mut tags: HashMap<String, Vec<String>> = HashMap::new();
+
+        for current_tags in multiple_tags {
+            add_to_tags(current_tags, &mut tags);
+        }
+
+        // assert
+        let expected_keys = ["writing", "organization", "style", "pattern"];
+
+        let expected_values = HashMap::from([
+            ("writing", vec!["organization", "pattern", "style"]),
+            ("organization", vec!["writing"]),
+            ("style", vec!["pattern", "writing"]),
             ("pattern", vec!["style", "writing"]),
         ]);
 
