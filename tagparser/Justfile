@@ -9,3 +9,7 @@ fmt:
 # runs the program locally
 start:
 	cargo run data output
+
+# runs unit tests
+test:
+	cargo test -- --nocapture

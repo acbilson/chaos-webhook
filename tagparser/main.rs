@@ -205,3 +205,18 @@ fn get_frontmatter(content: &str, file_name: &str) -> Result<FrontMatter, FrontM
 
     Ok(frontmatter)
 }
+
+#[cfg(test)]
+mod main_tests {
+    use crate::parse_files;
+
+    #[test]
+    fn parses_all_writing_files() {
+        let start_dir = String::from("testdata");
+        let result = parse_files(&start_dir);
+        println!("test complete");
+        println!("{:?}", result.tags_map);
+        println!("{:?}", result.backrefs_map);
+        assert!(result.tags_map.len() > 0);
+    }
+}
