@@ -4,7 +4,7 @@ clean:
 
 # formats the project
 fmt:
-	rustfmt main.rs
+	rustfmt src/*
 
 # runs the program locally
 start:

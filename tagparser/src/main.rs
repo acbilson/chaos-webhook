@@ -3,17 +3,12 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
-use walkdir::DirEntry;
 use walkdir::WalkDir;
 
 mod models;
+mod operators;
 
-use models::{
-    ReferenceSet,
-    FrontMatter,
-    FrontMatterError,
-    ParseResults
-};
+use models::{FrontMatter, FrontMatterError, ParseResults, ReferenceSet};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -34,16 +29,12 @@ fn parse_files(start_dir: &str) -> ParseResults {
     // [^\s]+ = puts the first word unbroken by a space into the "src" pattern
     let re = Regex::new(r"\{\{< backref.*src=(?P<src>[^\s]+) >\}\}").unwrap();
 
-    let is_markdown = |e: &DirEntry| -> bool {
-        !e.file_type().is_dir() & e.file_name().to_string_lossy().ends_with(".md")
-    };
-
     let mut backrefs: HashMap<String, Vec<String>> = HashMap::new();
     let mut tags: HashMap<String, Vec<String>> = HashMap::new();
 
     // e.ok() skips files the program can't open (insufficient permissions for example)
     for entry in WalkDir::new(start_dir).into_iter().filter_map(|e| e.ok()) {
-        if is_markdown(&entry) {
+        if !&entry.file_type().is_dir() && operators::is_markdown(&entry.file_name()) {
             let file_path = entry.into_path();
             let content = fs::read_to_string(&file_path).expect("content is readable");
             let path_str = file_path.to_str().unwrap().to_string();
@@ -87,6 +78,7 @@ fn add_to_backrefs(
     }
 }
 
+// TODO: split dedupe from json conversion
 fn convert_to_json(source: &HashMap<String, Vec<String>>) -> String {
     let mut backrefs: Vec<String> = Vec::new();
     for (key, value) in source {
