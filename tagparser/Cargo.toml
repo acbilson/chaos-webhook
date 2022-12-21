@@ -14,4 +14,3 @@ walkdir = "2"
 
 [[bin]]
 name = "tagparser"
-path = "main.rs"

@@ -1,6 +1,4 @@
 use regex::Regex;
-use serde::Deserialize;
-use serde::Serialize;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::env;
@@ -8,63 +6,14 @@ use std::fs;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
 
-#[derive(Serialize, Deserialize)]
-struct ReferenceSet {
-    referrer: String,
-    sources: Vec<String>,
-}
+mod models;
 
-#[derive(Serialize, Deserialize, Default, Debug)]
-struct Syndicated {
-    mastodon: String,
-}
-
-impl PartialEq for Syndicated {
-    fn eq(&self, o: &Self) -> bool {
-        self.mastodon == o.mastodon
-    }
-}
-
-impl Eq for Syndicated {}
-
-#[derive(Serialize, Deserialize, Default, Debug)]
-struct FrontMatter {
-    author: Option<String>,
-    date: Option<String>,
-    lastmod: Option<String>,
-    epistemic: Option<String>,
-    tags: Option<Vec<String>>,
-    syndicate: Option<bool>,
-    syndicated: Option<Syndicated>,
-
-    #[serde(alias = "in-reply-to")]
-    inreplyto: Option<String>,
-}
-
-impl PartialEq for FrontMatter {
-    fn eq(&self, o: &Self) -> bool {
-        self.author == o.author
-            && self.date == o.date
-            && self.lastmod == o.lastmod
-            && self.epistemic == o.epistemic
-            && self.tags == o.tags
-            && self.syndicate == o.syndicate
-            && self.syndicated == o.syndicated
-    }
-}
-
-impl Eq for FrontMatter {}
-
-#[derive(Debug)]
-pub enum FrontMatterError {
-    MissingTomlTags,
-    NotValidToml(String),
-}
-
-struct ParseResults {
-    tags_map: HashMap<String, Vec<String>>,
-    backrefs_map: HashMap<String, Vec<String>>,
-}
+use models::{
+    ReferenceSet,
+    FrontMatter,
+    FrontMatterError,
+    ParseResults
+};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
