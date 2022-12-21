@@ -1,9 +1,8 @@
 use regex::Regex;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::env;
-use std::fs;
-use walkdir::WalkDir;
+use std::{env, fs};
+use walkdir::{DirEntry, WalkDir};
 
 mod models;
 mod operators;
@@ -17,8 +16,8 @@ fn main() {
 
     let results = parse_files(&start_dir);
 
-    let backrefs = convert_to_json(&results.backrefs_map);
-    let tags = convert_to_json(&results.tags_map);
+    let backrefs = operators::hashmap_to_json(&results.backrefs_map);
+    let tags = operators::hashmap_to_json(&results.tags_map);
 
     fs::write(format!("{}/tags.json", &out_dir), &tags).expect("writes tag data to tags.json");
     fs::write(format!("{}/backrefs.json", &out_dir), &backrefs)
@@ -32,9 +31,13 @@ fn parse_files(start_dir: &str) -> ParseResults {
     let mut backrefs: HashMap<String, Vec<String>> = HashMap::new();
     let mut tags: HashMap<String, Vec<String>> = HashMap::new();
 
+    let is_markdown = |e: &DirEntry| -> bool {
+        !e.file_type().is_dir() && e.file_name().to_string_lossy().ends_with(".md")
+    };
+
     // e.ok() skips files the program can't open (insufficient permissions for example)
     for entry in WalkDir::new(start_dir).into_iter().filter_map(|e| e.ok()) {
-        if !&entry.file_type().is_dir() && operators::is_markdown(&entry.file_name()) {
+        if is_markdown(&entry) {
             let file_path = entry.into_path();
             let content = fs::read_to_string(&file_path).expect("content is readable");
             let path_str = file_path.to_str().unwrap().to_string();
@@ -76,26 +79,6 @@ fn add_to_backrefs(
             }
         }
     }
-}
-
-// TODO: split dedupe from json conversion
-fn convert_to_json(source: &HashMap<String, Vec<String>>) -> String {
-    let mut backrefs: Vec<String> = Vec::new();
-    for (key, value) in source {
-        let mut deduped_sources = value.to_vec();
-        deduped_sources.sort();
-        deduped_sources.dedup();
-        let backref = ReferenceSet {
-            referrer: key.to_string(),
-            sources: deduped_sources,
-        };
-        let backref_str = match serde_json::to_string(&backref) {
-            Ok(b) => b,
-            Err(_) => "".to_string(),
-        };
-        backrefs.push(backref_str.to_string());
-    }
-    return format!("[{}]", backrefs.join(","));
 }
 
 fn add_to_tags(frontmatter: &FrontMatter, tags: &mut HashMap<String, Vec<String>>) {

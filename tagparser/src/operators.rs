@@ -1,24 +1,46 @@
-use std::ffi::OsStr;
+use std::collections::HashMap;
 
-pub fn is_markdown(file_name: &OsStr) -> bool {
-    return file_name.to_string_lossy().ends_with(".md");
+use crate::ReferenceSet;
+
+pub fn hashmap_to_json(source: &HashMap<String, Vec<String>>) -> String {
+    let mut backrefs: Vec<String> = Vec::new();
+    for (key, value) in source {
+        let mut deduped_sources = value.to_vec();
+        deduped_sources.sort();
+        deduped_sources.dedup();
+        let backref = ReferenceSet {
+            referrer: key.to_string(),
+            sources: deduped_sources,
+        };
+        let backref_str = match serde_json::to_string(&backref) {
+            Ok(b) => b,
+            Err(_) => "".to_string(),
+        };
+        backrefs.push(backref_str.to_string());
+    }
+    return format!("[{}]", backrefs.join(","));
 }
 
 #[cfg(test)]
 mod operator_tests {
-    use std::ffi::OsStr;
-
     use crate::operators;
+    use std::collections::HashMap;
 
     #[test]
-    fn is_markdown_correctly_matches_file() {
+    fn hashmap_to_json_successful_conversion() {
         // arrange
-        let file_name = OsStr::new("test.md");
+        let map = HashMap::from([(
+            String::from("writing"),
+            vec![String::from("style"), String::from("pattern")],
+        )]);
 
         // act
-        let result = operators::is_markdown(&file_name);
+        let result = operators::hashmap_to_json(&map);
 
         // assert
-        assert_eq!(result, true);
+        assert_eq!(
+            result,
+            String::from("[{\"referrer\":\"writing\",\"sources\":[\"pattern\",\"style\"]}]")
+        );
     }
 }
