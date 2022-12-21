@@ -49,7 +49,7 @@ impl PartialEq for FrontMatter {
 
 impl Eq for FrontMatter {}
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum FrontMatterError {
     MissingTomlTags,
     NotValidToml(String),

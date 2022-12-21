@@ -105,20 +105,7 @@ fn add_to_tags(frontmatter: &FrontMatter, tags: &mut HashMap<String, Vec<String>
 }
 
 fn get_frontmatter(content: &str, file_name: &str) -> Result<FrontMatter, FrontMatterError> {
-    let parse_header = |c: &str| -> Result<String, FrontMatterError> {
-        if !c.contains("+++") {
-            return Err(FrontMatterError::MissingTomlTags);
-        }
-        let first_idx: usize = c.find("+++").unwrap();
-        let last_idx: usize = c.rfind("+++").unwrap();
-
-        if first_idx == last_idx {
-            return Err(FrontMatterError::MissingTomlTags);
-        }
-        Ok(String::from(&content[first_idx + 3..last_idx]))
-    };
-
-    let header = parse_header(content)?;
+    let header = operators::get_toml_header(content)?;
 
     // converts toml error to my custom error type
     let frontmatter: FrontMatter = toml::from_str(&header).map_err(|e| {

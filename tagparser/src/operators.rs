@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::ReferenceSet;
+use crate::{FrontMatterError, ReferenceSet};
 
 pub fn hashmap_to_json(source: &HashMap<String, Vec<String>>) -> String {
     let mut backrefs: Vec<String> = Vec::new();
@@ -21,9 +21,23 @@ pub fn hashmap_to_json(source: &HashMap<String, Vec<String>>) -> String {
     return format!("[{}]", backrefs.join(","));
 }
 
+pub fn get_toml_header(content: &str) -> Result<String, FrontMatterError> {
+    if !content.contains("+++") {
+        return Err(FrontMatterError::MissingTomlTags);
+    }
+    let first_idx: usize = content.find("+++").unwrap();
+    let last_idx: usize = content.rfind("+++").unwrap();
+
+    if first_idx == last_idx {
+        return Err(FrontMatterError::MissingTomlTags);
+    }
+    Ok(String::from(&content[first_idx + 3..last_idx]))
+}
+
 #[cfg(test)]
 mod operator_tests {
     use crate::operators;
+    use crate::FrontMatterError;
     use std::collections::HashMap;
 
     #[test]
@@ -42,5 +56,50 @@ mod operator_tests {
             result,
             String::from("[{\"referrer\":\"writing\",\"sources\":[\"pattern\",\"style\"]}]")
         );
+    }
+
+    #[test]
+    fn get_toml_header_has_header_success() {
+        // arrange
+        let content = String::from("+++\nname = \"Alex\"\nage = 34\n+++\nThis is some content\n");
+
+        // act
+        let result = operators::get_toml_header(&content);
+
+        // assert
+        match result {
+            Ok(c) => assert_eq!(c, String::from("\nname = \"Alex\"\nage = 34\n")),
+            Err(e) => panic!("{:?}", e),
+        }
+    }
+
+    #[test]
+    fn get_toml_header_missing_tags_error() {
+        // arrange
+        let content = String::from("name = \"Alex\"\nage = 34\nThis is some content\n");
+
+        // act
+        let result = operators::get_toml_header(&content);
+
+        // assert
+        match result {
+            Ok(_) => panic!("should not return content without tags"),
+            Err(e) => assert_eq!(e, FrontMatterError::MissingTomlTags),
+        }
+    }
+
+    #[test]
+    fn get_toml_header_incomplete_tags_error() {
+        // arrange
+        let content = String::from("+++\nname = \"Alex\"\nage = 34\nThis is some content\n");
+
+        // act
+        let result = operators::get_toml_header(&content);
+
+        // assert
+        match result {
+            Ok(_) => panic!("should not return content with incomplete tags"),
+            Err(e) => assert_eq!(e, FrontMatterError::MissingTomlTags),
+        }
     }
 }
