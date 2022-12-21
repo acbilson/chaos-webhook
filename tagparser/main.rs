@@ -161,16 +161,18 @@ fn add_to_tags(frontmatter: &FrontMatter, tags: &mut HashMap<String, Vec<String>
     if let Some(current_tags) = &frontmatter.tags {
         let mut sorted_tags = current_tags.to_vec();
         sorted_tags.sort();
-        let mut clone = sorted_tags.clone();
 
-        for t in sorted_tags {
-            match tags.entry(String::from(&t)) {
+        for t in &sorted_tags {
+            // retain() replaces the vector, so create a new vector for each tag match.
+            let mut clone = &mut sorted_tags.to_owned();
+
+            match tags.entry(String::from(t)) {
                 Entry::Vacant(e) => {
-                    clone.retain(|x| *x != t);
+                    clone.retain(|x| x != t);
                     e.insert(clone.to_vec());
                 }
                 Entry::Occupied(mut e) => {
-                    clone.retain(|x| *x != t);
+                    clone.retain(|x| x != t);
                     e.get_mut().append(&mut clone);
                 }
             }
@@ -208,15 +210,48 @@ fn get_frontmatter(content: &str, file_name: &str) -> Result<FrontMatter, FrontM
 
 #[cfg(test)]
 mod main_tests {
-    use crate::parse_files;
+    use std::collections::HashMap;
+
+    use crate::add_to_tags;
+    use crate::FrontMatter;
 
     #[test]
-    fn parses_all_writing_files() {
-        let start_dir = String::from("testdata");
-        let result = parse_files(&start_dir);
-        println!("test complete");
-        println!("{:?}", result.tags_map);
-        println!("{:?}", result.backrefs_map);
-        assert!(result.tags_map.len() > 0);
+    fn adds_frontmatter_to_tags() {
+        // arrange
+        let fm = FrontMatter {
+            author: None,
+            date: None,
+            lastmod: None,
+            epistemic: None,
+            syndicate: None,
+            syndicated: None,
+            inreplyto: None,
+            tags: Some(vec![
+                String::from("writing"),
+                String::from("style"),
+                String::from("pattern"),
+            ]),
+        };
+
+        // act
+        let mut tags: HashMap<String, Vec<String>> = HashMap::new();
+        add_to_tags(&fm, &mut tags);
+
+        // assert
+        let expected_keys = ["writing", "style", "pattern"];
+
+        let expected_values = HashMap::from([
+            ("style", vec!["pattern", "writing"]),
+            ("writing", vec!["pattern", "style"]),
+            ("pattern", vec!["style", "writing"]),
+        ]);
+
+        for &key in &expected_keys {
+            // assert key in map
+            match tags.get(key) {
+                Some(value) => assert_eq!(value, expected_values.get(key).unwrap()),
+                None => panic!("key {} not present in tags", key),
+            }
+        }
     }
 }
