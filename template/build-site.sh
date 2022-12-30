@@ -157,15 +157,16 @@ chaos-theme)
 
 esac
 
-echo "\n\nrunning tagparser from /mnt/chaos/content" to /mnt/chaos/data
-/bin/mkdir -p /mnt/chaos/data
-/usr/local/bin/tagparser /mnt/chaos/content /mnt/chaos/data
-
+# removes cache first, hopefully to fix missing backlinks
 if [ -d /tmp/hugo_cache ]; then
   echo "\n\nclearing hugo cache from last build"
   echo "################"
   /bin/rm -rf /tmp/hugo_cache
 fi
+
+echo "\n\nrunning tagparser from /mnt/chaos/content" to /mnt/chaos/data
+/bin/mkdir -p /mnt/chaos/data
+/usr/local/bin/tagparser /mnt/chaos/content /mnt/chaos/data
 
 echo "\nbuilding site from $BRANCH to $DIST_PATH"
 echo "################"
