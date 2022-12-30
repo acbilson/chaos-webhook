@@ -25,8 +25,7 @@ fn main() {
 }
 
 fn parse_files(start_dir: &str) -> ParseResults {
-    // [^\s]+ = puts the first word unbroken by a space into the "src" pattern
-    let re = Regex::new(r"\{\{< backref.*src=(?P<src>[^\s]+) >\}\}").unwrap();
+    let re = Regex::new(r"\{\{< backref.*?src=(?P<src>.*?)\s.*?>\}\}").unwrap();
 
     let mut backrefs: HashMap<String, Vec<String>> = HashMap::new();
     let mut tags: HashMap<String, Vec<String>> = HashMap::new();
@@ -106,8 +105,10 @@ fn add_to_tags(new_tags: Option<Vec<String>>, tags: &mut HashMap<String, Vec<Str
 
 #[cfg(test)]
 mod main_tests {
+    use regex::Regex;
     use std::collections::HashMap;
 
+    use crate::add_to_backrefs;
     use crate::add_to_tags;
 
     #[test]
@@ -175,6 +176,63 @@ mod main_tests {
             match tags.get(key) {
                 Some(value) => assert_eq!(value, expected_values.get(key).unwrap()),
                 None => panic!("key {} not present in tags", key),
+            }
+        }
+    }
+
+    #[test]
+    fn add_to_backrefs_adds_all_backrefs() {
+        // arrange
+        let re = Regex::new(r"\{\{< backref.*?src=(?P<src>.*?)\s.*?>\}\}").unwrap();
+        let referrer = String::from("/gardens/faith/what-i-have-learned-about-trust.md");
+        let content = String::from("### Cognitive & Affective
+
+Trust can be broadly categorized into cognitive and affective.
+
+Cognitive trust depends on a person's performance over time. If they've shown themselves trustworthy by regularly doing what they've promised, we put our cognitive trust in them.
+
+Affective trust is build on the confidence that we know who a person is at their core. Our trust grows as the person is open and vulnerable with us; whether in a private conversation over drinks at the pub or a raucous game of chinese checkers.
+
+While it's common for American's to expect only cognitive trust in their work relationships, most of the world feels that {{< backref src=\"/plants/leadership/foster-trust-with-both-performance-and-vulnerability\" name=\"both cognitive and affective trust are vital\" >}}. And the sense of {{< backref src=\"/plants/business/employees-need-communication-growth-recognition-and-trust\" name=\"being trusted is crucial for work engagement\" >}}.
+
+Both categories of trust apply to business, but these ideas also resonate in trust of Yahweh. Evangelism in American contexts has leaned heavily towards cognitive trust. Read the Bible, remember Yahweh's works, trust him. Trust built upon Yahweh's track record is {{< backref src=\"/stones/bible/hear-obey-and-live\" name=\"recommended at all times\" >}}, but not to the exclusion of an affective trust. For this reason, helping people discover Jesus must include information about him, but it must also include a real encounter with him, through prayer, healing, prophesy, etc. Perhaps this helps explain why {{< backref src=\"/plants/faith/becoming-a-christian-is-a-process\" >}}?");
+
+        // act
+        let mut backrefs: HashMap<String, Vec<String>> = HashMap::new();
+        add_to_backrefs(&re, &referrer, &content, &mut backrefs);
+
+        // assert
+        let expected_keys = [
+            "/plants/leadership/foster-trust-with-both-performance-and-vulnerability.md",
+            "/plants/business/employees-need-communication-growth-recognition-and-trust.md",
+            "/stones/bible/hear-obey-and-live.md",
+            "/plants/faith/becoming-a-christian-is-a-process.md",
+        ];
+
+        let expected_values = HashMap::from([
+            (
+                "/plants/leadership/foster-trust-with-both-performance-and-vulnerability.md",
+                vec!["/gardens/faith/what-i-have-learned-about-trust.md"],
+            ),
+            (
+                "/plants/business/employees-need-communication-growth-recognition-and-trust.md",
+                vec!["/gardens/faith/what-i-have-learned-about-trust.md"],
+            ),
+            (
+                "/stones/bible/hear-obey-and-live.md",
+                vec!["/gardens/faith/what-i-have-learned-about-trust.md"],
+            ),
+            (
+                "/plants/faith/becoming-a-christian-is-a-process.md",
+                vec!["/gardens/faith/what-i-have-learned-about-trust.md"],
+            ),
+        ]);
+
+        for &key in &expected_keys {
+            // assert key in map
+            match backrefs.get(key) {
+                Some(value) => assert_eq!(value, expected_values.get(key).unwrap()),
+                None => panic!("key {} not present in backrefs", key),
             }
         }
     }
