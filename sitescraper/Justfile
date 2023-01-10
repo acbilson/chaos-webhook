@@ -1,0 +1,15 @@
+# cleans the project
+clean:
+	cargo clean
+
+# formats the project
+fmt:
+	rustfmt src/*
+
+# runs the program locally
+start:
+	cargo run
+
+# runs unit tests
+test:
+	cargo test -- --nocapture
